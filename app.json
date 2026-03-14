@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "expo-sqlite-drizzle",
-    "slug": "expo-sqlite-drizzle",
+    "name": "beastmode",
+    "slug": "beastmode",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
