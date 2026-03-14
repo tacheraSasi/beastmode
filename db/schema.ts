@@ -21,10 +21,11 @@ export const goals = sqliteTable("goals", {
 
   goalHours: integer("goal_hours").default(100),
 
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date()),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date(),
+  ),
 
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+  updatedAt: integer("updated_at", { mode: "timestamp" }),
 });
 
 export const sessions = sqliteTable("sessions", {
@@ -42,26 +43,38 @@ export const sessions = sqliteTable("sessions", {
 
   notes: text("notes"),
 
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date(),
+  ),
 });
 
+export const dailyStats = sqliteTable("daily_stats", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
 
+  goalId: integer("goal_id")
+    .notNull()
+    .references(() => goals.id),
+
+  date: integer("date", { mode: "timestamp" }).notNull(),
+
+  durationSeconds: integer("duration_seconds").notNull().default(0),
+
+  sessionCount: integer("session_count").default(0),
+});
 
 export const goalRelations = relations(goals, ({ many }) => ({
-  sessions: many(sessions)
+  sessions: many(sessions),
 }));
 
 export const sessionRelations = relations(sessions, ({ one }) => ({
   goal: one(goals, {
     fields: [sessions.goalId],
-    references: [goals.id]
-  })
+    references: [goals.id],
+  }),
 }));
 
 export type Goal = typeof goals.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
-
 
 export type Habit = typeof habits.$inferSelect;
 export type Log = typeof logs.$inferSelect;
