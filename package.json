@@ -17,7 +17,7 @@
     "@react-navigation/native": "^7.0.14",
     "drizzle-orm": "^0.38.3",
     "expo": "^55.0.0",
-    "expo-drizzle-studio-plugin": "^0.1.1",
+    "expo-drizzle-studio-plugin": "^0.2.1",
     "expo-font": "~55.0.4",
     "expo-linking": "~55.0.7",
     "expo-router": "~55.0.5",
