@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const habits = sqliteTable("habits", {
@@ -45,6 +45,19 @@ export const sessions = sqliteTable("sessions", {
   createdAt: integer("created_at", { mode: "timestamp" })
     .$defaultFn(() => new Date())
 });
+
+
+
+export const goalRelations = relations(goals, ({ many }) => ({
+  sessions: many(sessions)
+}));
+
+export const sessionRelations = relations(sessions, ({ one }) => ({
+  goal: one(goals, {
+    fields: [sessions.goalId],
+    references: [goals.id]
+  })
+}));
 
 export type Goal = typeof goals.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
