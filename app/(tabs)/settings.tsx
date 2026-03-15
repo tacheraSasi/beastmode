@@ -1,150 +1,139 @@
-import { useState } from "react";
 import {
-  Alert,
-  FlatList,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
+  Linking,
+  ScrollView,
 } from "react-native";
 
 import { Text, View, useColors } from "@/components/Themed";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useHabits } from "@/context/habits-context";
-import { useRouter, type Href } from "expo-router";
+import { useThemeMode } from "@/context/theme-context";
 import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
-import { Habit } from "@/db";
+
+type ThemeOption = "system" | "light" | "dark";
 
 export default function SettingsScreen() {
-  const { habitsList, addHabit, removeHabit } = useHabits();
-  const [newHabit, setNewHabit] = useState("");
-  const router = useRouter();
+  const { mode, setMode } = useThemeMode();
   const c = useColors();
 
-  const onAddHabit = () => {
-    const habit = newHabit.trim();
-    if (habit) {
-      addHabit(habit);
-      setNewHabit("");
-    }
-  };
-
-  const onRemoveHabit = (habit: Habit) => {
-    Alert.alert(
-      "Remove Habit",
-      `Are you sure you want to remove "${habit.name}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Remove",
-          onPress: () => removeHabit(habit.id),
-          style: "destructive",
-        },
-      ],
-    );
-  };
+  const themeOptions: { value: ThemeOption; label: string; icon: keyof typeof MaterialIcons.glyphMap }[] = [
+    { value: "system", label: "System", icon: "smartphone" },
+    { value: "light", label: "Light", icon: "light-mode" },
+    { value: "dark", label: "Dark", icon: "dark-mode" },
+  ];
 
   return (
     <ScreenLayout insideTabs>
-      <View style={styles.container}>
+      <ScrollView
+        style={[styles.container, { backgroundColor: c.background }]}
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={[styles.pageTitle, { color: c.text }]}>Settings</Text>
 
-        <TouchableOpacity
+        {/* Appearance */}
+        <Text style={[styles.sectionLabel, { color: c.textSecondary }]}>
+          APPEARANCE
+        </Text>
+        <View
           style={[
-            styles.navCard,
+            styles.card,
             { backgroundColor: c.card, borderColor: c.border },
           ]}
-          onPress={() => router.push("/habit-tracker" as Href)}
-          activeOpacity={0.7}
         >
-          <View
-            style={[styles.navIconWrap, { backgroundColor: c.successLight }]}
-          >
-            <MaterialIcons name="check-circle" size={22} color={c.success} />
-          </View>
-          <View style={[styles.navContent, { backgroundColor: "transparent" }]}>
-            <Text style={[styles.navText, { color: c.text }]}>
-              Habit Tracker
-            </Text>
-            <Text style={[styles.navSub, { color: c.textSecondary }]}>
-              Track your daily habits
-            </Text>
-          </View>
-          <MaterialIcons name="chevron-right" size={22} color={c.textMuted} />
-        </TouchableOpacity>
-
-        <Text style={[styles.sectionTitle, { color: c.text }]}>
-          Manage Habits
-        </Text>
-
-        <View style={[styles.inputRow, { backgroundColor: "transparent" }]}>
-          <TextInput
-            style={[
-              styles.input,
-              {
-                backgroundColor: c.surfaceAlt,
-                borderColor: c.border,
-                color: c.text,
-              },
-            ]}
-            value={newHabit}
-            onChangeText={setNewHabit}
-            placeholder="Enter new habit"
-            placeholderTextColor={c.textMuted}
-            returnKeyType="done"
-            onSubmitEditing={onAddHabit}
-          />
-          <TouchableOpacity
-            style={[
-              styles.addButton,
-              {
-                backgroundColor: Colors.accent,
-                opacity: newHabit.trim() ? 1 : 0.5,
-              },
-            ]}
-            onPress={onAddHabit}
-            disabled={!newHabit.trim()}
-            activeOpacity={0.8}
-          >
-            <MaterialIcons name="add" size={22} color="#fff" />
-          </TouchableOpacity>
+          {themeOptions.map((opt, i) => (
+            <TouchableOpacity
+              key={opt.value}
+              style={[
+                styles.themeRow,
+                i < themeOptions.length - 1 && {
+                  borderBottomWidth: 1,
+                  borderBottomColor: c.border,
+                },
+              ]}
+              onPress={() => setMode(opt.value)}
+              activeOpacity={0.6}
+            >
+              <MaterialIcons
+                name={opt.icon}
+                size={20}
+                color={mode === opt.value ? Colors.accent : c.textMuted}
+              />
+              <Text
+                style={[
+                  styles.themeLabel,
+                  {
+                    color: mode === opt.value ? c.text : c.textSecondary,
+                    fontWeight: mode === opt.value ? "700" : "500",
+                  },
+                ]}
+              >
+                {opt.label}
+              </Text>
+              {mode === opt.value && (
+                <MaterialIcons
+                  name="check-circle"
+                  size={20}
+                  color={Colors.accent}
+                />
+              )}
+            </TouchableOpacity>
+          ))}
         </View>
 
-        <FlatList
-          data={habitsList}
-          keyExtractor={(item) => item.id.toString()}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <View
-              style={[
-                styles.habitItem,
-                { borderBottomColor: c.border, backgroundColor: "transparent" },
-              ]}
-            >
-              <View
-                style={[styles.habitLeft, { backgroundColor: "transparent" }]}
-              >
-                <View
-                  style={[styles.habitDot, { backgroundColor: Colors.accent }]}
-                />
-                <Text style={[styles.habitName, { color: c.text }]}>
-                  {item.name}
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => onRemoveHabit(item)}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <MaterialIcons
-                  name="delete-outline"
-                  size={22}
-                  color={c.danger}
-                />
-              </TouchableOpacity>
-            </View>
-          )}
-        />
-      </View>
+        {/* About */}
+        <Text style={[styles.sectionLabel, { color: c.textSecondary }]}>
+          ABOUT
+        </Text>
+        <View
+          style={[
+            styles.card,
+            { backgroundColor: c.card, borderColor: c.border },
+          ]}
+        >
+          <View style={[styles.aboutRow, { borderBottomWidth: 1, borderBottomColor: c.border }]}>
+            <Text style={[styles.aboutLabel, { color: c.textSecondary }]}>
+              App
+            </Text>
+            <Text style={[styles.aboutValue, { color: c.text }]}>
+              Beastmode
+            </Text>
+          </View>
+          <View style={[styles.aboutRow, { borderBottomWidth: 1, borderBottomColor: c.border }]}>
+            <Text style={[styles.aboutLabel, { color: c.textSecondary }]}>
+              Version
+            </Text>
+            <Text style={[styles.aboutValue, { color: c.text }]}>1.0.0</Text>
+          </View>
+          <View style={styles.aboutRow}>
+            <Text style={[styles.aboutLabel, { color: c.textSecondary }]}>
+              Developer
+            </Text>
+            <Text style={[styles.aboutValue, { color: c.text }]}>
+              tacheraSasi
+            </Text>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          style={styles.ghButton}
+          onPress={() =>
+            Linking.openURL("https://github.com/tacheraSasi/beastmode")
+          }
+          activeOpacity={0.7}
+        >
+          <MaterialIcons name="code" size={18} color={Colors.accent} />
+          <Text style={[styles.ghText, { color: Colors.accent }]}>
+            View on GitHub
+          </Text>
+        </TouchableOpacity>
+
+        <Text style={[styles.footer, { color: c.textMuted }]}>
+          Built with Expo & React Native
+        </Text>
+
+        <View style={{ height: 30, backgroundColor: "transparent" }} />
+      </ScrollView>
     </ScreenLayout>
   );
 }
@@ -157,55 +146,50 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
     marginBottom: 20,
   },
-  navCard: {
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 0.8,
+    marginBottom: 8,
+    marginTop: 12,
+    marginLeft: 4,
+  },
+  card: {
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: 16,
+    overflow: "hidden",
+  },
+  themeRow: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    marginBottom: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  navIconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  navContent: { flex: 1 },
-  navText: { fontSize: 16, fontWeight: "700" },
-  navSub: { fontSize: 13, marginTop: 2 },
-  sectionTitle: { fontSize: 20, fontWeight: "700", marginBottom: 14 },
-  inputRow: { flexDirection: "row", marginBottom: 16, gap: 10 },
-  input: {
-    flex: 1,
-    height: 48,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    fontSize: 15,
-  },
-  addButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  habitItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     paddingVertical: 14,
-    borderBottomWidth: 1,
+    paddingHorizontal: 16,
+    backgroundColor: "transparent",
   },
-  habitLeft: { flexDirection: "row", alignItems: "center", flex: 1 },
-  habitDot: { width: 8, height: 8, borderRadius: 4, marginRight: 12 },
-  habitName: { fontSize: 16, fontWeight: "500" },
+  themeLabel: { flex: 1, fontSize: 15, marginLeft: 12 },
+  aboutRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 13,
+    paddingHorizontal: 16,
+    backgroundColor: "transparent",
+  },
+  aboutLabel: { fontSize: 14 },
+  aboutValue: { fontSize: 14, fontWeight: "600" },
+  ghButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    marginTop: 4,
+  },
+  ghText: { fontSize: 14, fontWeight: "600", marginLeft: 6 },
+  footer: {
+    textAlign: "center",
+    fontSize: 12,
+    marginTop: 8,
+    marginBottom: 8,
+  },
 });

@@ -80,7 +80,7 @@ export default function HomeScreen() {
             <Text style={[styles.greeting, { color: c.textMuted }]}>
               Welcome back
             </Text>
-            <Text style={[styles.title, { color: c.text }]}>Dashboard</Text>
+            <Text style={[styles.title, { color: c.text }]}>Legendary</Text>
           </View>
           <TouchableOpacity
             style={[styles.addBtn, { backgroundColor: Colors.accent }]}

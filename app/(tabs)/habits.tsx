@@ -1,10 +1,18 @@
-import { FlatList, TouchableOpacity, StyleSheet } from "react-native";
+import { useState } from "react";
+import {
+  Alert,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useHabits } from "@/context/habits-context";
 import { DateSelector } from "@/components/DateSelector";
 import { View, Text, useColors } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
+import { Habit } from "@/db";
 
 export default function HabitsTab() {
   const {
@@ -13,8 +21,12 @@ export default function HabitsTab() {
     selectedDate,
     setSelectedDate,
     toggleHabit,
+    addHabit,
+    removeHabit,
   } = useHabits();
   const c = useColors();
+  const [managing, setManaging] = useState(false);
+  const [newHabit, setNewHabit] = useState("");
 
   const completedCount = dailyHabits.filter((h) => h.completed).length;
   const progressPct =
@@ -22,10 +34,135 @@ export default function HabitsTab() {
       ? Math.round((completedCount / dailyHabits.length) * 100)
       : 0;
 
+  const onAddHabit = () => {
+    const name = newHabit.trim();
+    if (name) {
+      addHabit(name);
+      setNewHabit("");
+    }
+  };
+
+  const onRemoveHabit = (habit: Habit) => {
+    Alert.alert(
+      "Remove Habit",
+      `Are you sure you want to remove "${habit.name}"?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove",
+          onPress: () => removeHabit(habit.id),
+          style: "destructive",
+        },
+      ],
+    );
+  };
+
   return (
     <ScreenLayout insideTabs>
       <View style={styles.container}>
-        <Text style={[styles.pageTitle, { color: c.text }]}>Habits</Text>
+        <View style={[styles.headerRow, { backgroundColor: "transparent" }]}>
+          <Text style={[styles.pageTitle, { color: c.text }]}>Habits</Text>
+          <TouchableOpacity
+            style={[
+              styles.manageBtn,
+              {
+                backgroundColor: managing ? Colors.accent : c.surfaceAlt,
+              },
+            ]}
+            onPress={() => setManaging((v) => !v)}
+            activeOpacity={0.7}
+          >
+            <MaterialIcons
+              name={managing ? "close" : "edit"}
+              size={16}
+              color={managing ? "#fff" : c.textSecondary}
+            />
+            <Text
+              style={[
+                styles.manageBtnText,
+                { color: managing ? "#fff" : c.textSecondary },
+              ]}
+            >
+              {managing ? "Done" : "Manage"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Manage section */}
+        {managing && (
+          <View
+            style={[
+              styles.manageCard,
+              { backgroundColor: c.card, borderColor: c.border },
+            ]}
+          >
+            <View style={[styles.inputRow, { backgroundColor: "transparent" }]}>
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: c.surfaceAlt,
+                    borderColor: c.border,
+                    color: c.text,
+                  },
+                ]}
+                value={newHabit}
+                onChangeText={setNewHabit}
+                placeholder="New habit name"
+                placeholderTextColor={c.textMuted}
+                returnKeyType="done"
+                onSubmitEditing={onAddHabit}
+              />
+              <TouchableOpacity
+                style={[
+                  styles.addButton,
+                  {
+                    backgroundColor: Colors.accent,
+                    opacity: newHabit.trim() ? 1 : 0.5,
+                  },
+                ]}
+                onPress={onAddHabit}
+                disabled={!newHabit.trim()}
+                activeOpacity={0.8}
+              >
+                <MaterialIcons name="add" size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
+            {habitsList.map((item, i) => (
+              <View
+                key={item.id}
+                style={[
+                  styles.manageItem,
+                  {
+                    borderBottomColor: c.border,
+                    backgroundColor: "transparent",
+                    borderBottomWidth: i < habitsList.length - 1 ? 1 : 0,
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.manageItemDot,
+                    { backgroundColor: Colors.accent },
+                  ]}
+                />
+                <Text style={[styles.manageItemName, { color: c.text }]}>
+                  {item.name}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => onRemoveHabit(item)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <MaterialIcons
+                    name="delete-outline"
+                    size={20}
+                    color={c.danger}
+                  />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        )}
 
         <DateSelector date={selectedDate} onDateChange={setSelectedDate} />
 
@@ -101,7 +238,7 @@ export default function HabitsTab() {
               No habits yet
             </Text>
             <Text style={[styles.emptyText, { color: c.textSecondary }]}>
-              Add habits in Settings to start tracking
+              Tap "Manage" to add your first habit
             </Text>
           </View>
         ) : (
@@ -166,12 +303,56 @@ export default function HabitsTab() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 20, paddingTop: 16 },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
   pageTitle: {
     fontSize: 28,
     fontWeight: "800",
     letterSpacing: -0.5,
-    marginBottom: 20,
   },
+  manageBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 10,
+    gap: 4,
+  },
+  manageBtnText: { fontSize: 13, fontWeight: "600" },
+  manageCard: {
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: 14,
+    marginBottom: 16,
+  },
+  inputRow: { flexDirection: "row", marginBottom: 8, gap: 8 },
+  input: {
+    flex: 1,
+    height: 42,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    fontSize: 14,
+  },
+  addButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  manageItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  manageItemDot: { width: 7, height: 7, borderRadius: 4, marginRight: 10 },
+  manageItemName: { fontSize: 15, fontWeight: "500", flex: 1 },
   summaryCard: {
     borderRadius: 16,
     padding: 16,

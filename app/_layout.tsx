@@ -17,6 +17,7 @@ import { db, expo_sqlite } from "@/db";
 import migrations from "@/drizzle/migrations";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { HabitsProvider } from "@/context/habits-context";
+import { ThemeProvider as AppThemeProvider } from "@/context/theme-context";
 import { useKeepAwake } from "expo-keep-awake";
 
 export {
@@ -59,7 +60,11 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <AppThemeProvider>
+      <RootLayoutNav />
+    </AppThemeProvider>
+  );
 }
 
 function RootLayoutNav() {
