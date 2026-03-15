@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icons/ios/AppIcon@3x.png",
-    "scheme": "myapp",
+    "scheme": "beastmode",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/icons/ios/AppIcon~ios-marketing.png",

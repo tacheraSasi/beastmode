@@ -19,6 +19,7 @@
     "expo": "^55.0.0",
     "expo-drizzle-studio-plugin": "^0.2.1",
     "expo-font": "~55.0.4",
+    "expo-keep-awake": "~55.0.4",
     "expo-linking": "~55.0.7",
     "expo-router": "~55.0.5",
     "expo-splash-screen": "~55.0.10",

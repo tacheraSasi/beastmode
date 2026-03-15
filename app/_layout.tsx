@@ -17,6 +17,7 @@ import { db, expo_sqlite } from "@/db";
 import migrations from "@/drizzle/migrations";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { HabitsProvider } from "@/context/habits-context";
+import { useKeepAwake } from "expo-keep-awake";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -36,6 +37,7 @@ export default function RootLayout() {
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
   });
+  useKeepAwake();
 
   const { success, error: migrationError } = useMigrations(db, migrations);
 
