@@ -21,7 +21,8 @@
         "foregroundImage": "./assets/images/icons/android/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
         "backgroundImage": "./assets/images/icons/android/res/mipmap-xxxhdpi/ic_launcher_background.png",
         "monochromeImage": "./assets/images/icons/android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png"
-      }
+      },
+      "package": "com.tach.beastmode"
     },
     "plugins": [
       "expo-router",
