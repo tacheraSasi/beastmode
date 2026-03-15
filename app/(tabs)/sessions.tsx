@@ -5,6 +5,7 @@ import { useRouter, useFocusEffect, type Href } from "expo-router";
 import { getAllGoals, getActiveSession, getSessionsByGoal } from "@/db";
 import { View, Text, useColors } from "@/components/Themed";
 import Colors from "@/constants/Colors";
+import ScreenLayout from "@/components/ScreenLayout";
 import type { Goal, Session } from "@/db";
 
 type GoalWithSession = Goal & {
@@ -45,6 +46,7 @@ export default function SessionsScreen() {
   };
 
   return (
+    <ScreenLayout insideTabs>
     <View style={styles.container}>
       <Text style={[styles.title, { color: c.text }]}>Sessions</Text>
 
@@ -183,6 +185,7 @@ export default function SessionsScreen() {
         />
       )}
     </View>
+    </ScreenLayout>
   );
 }
 

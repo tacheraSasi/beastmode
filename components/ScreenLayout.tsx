@@ -1,8 +1,8 @@
-import Colors from "@/constants/Colors";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { KeyboardAwareView } from "./keyboard-aware-view";
+import { useColors } from "./Themed";
 
 interface ScreenLayoutProps {
   children: React.ReactNode;
@@ -29,6 +29,7 @@ export default function ScreenLayout({
   keyboardVerticalOffset = 0,
   insideTabs = false
 }: ScreenLayoutProps) {
+  const c = useColors();
   const content = (
     <>
       {children}
@@ -41,6 +42,7 @@ export default function ScreenLayout({
         style={[
           screenLayoutStyles.container,
           screenLayoutStyles.fullScreen,
+          { backgroundColor: c.background },
           ...(styles ? [styles] : []),
         ]}
       >
@@ -65,7 +67,7 @@ export default function ScreenLayout({
       edges={safeAreaEdges}
       style={[
         screenLayoutStyles.container,
-        { backgroundColor: Colors.light.background },
+        { backgroundColor: c.background },
         ...(styles ? [styles] : []),
       ]}
     >

@@ -5,6 +5,7 @@ import { useRouter, useFocusEffect, type Href } from "expo-router";
 import { getAllGoals, getGoalProgress } from "@/db";
 import { View, Text, useColors } from "@/components/Themed";
 import Colors from "@/constants/Colors";
+import ScreenLayout from "@/components/ScreenLayout";
 import type { Goal } from "@/db";
 
 type GoalWithProgress = Goal & { totalHours: number; percentage: number };
@@ -39,6 +40,7 @@ export default function HomeScreen() {
   );
 
   return (
+    <ScreenLayout insideTabs>
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={{ backgroundColor: "transparent" }}>
@@ -156,6 +158,7 @@ export default function HomeScreen() {
         />
       )}
     </View>
+    </ScreenLayout>
   );
 }
 

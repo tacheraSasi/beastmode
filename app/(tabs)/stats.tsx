@@ -5,6 +5,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { getAllGoals, getGoalProgress, getStatsForDateRange } from "@/db";
 import { View, Text, useColors } from "@/components/Themed";
 import Colors from "@/constants/Colors";
+import ScreenLayout from "@/components/ScreenLayout";
 import type { Goal } from "@/db";
 
 type GoalStat = Goal & {
@@ -63,6 +64,7 @@ export default function StatsScreen() {
   };
 
   return (
+    <ScreenLayout insideTabs>
     <ScrollView
       style={[styles.container, { backgroundColor: c.background }]}
       showsVerticalScrollIndicator={false}
@@ -149,6 +151,7 @@ export default function StatsScreen() {
 
       <View style={{ height: 30, backgroundColor: "transparent" }} />
     </ScrollView>
+    </ScreenLayout>
   );
 }
 

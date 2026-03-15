@@ -12,6 +12,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useHabits } from "@/context/habits-context";
 import { useRouter, type Href } from "expo-router";
 import Colors from "@/constants/Colors";
+import ScreenLayout from "@/components/ScreenLayout";
 import { Habit } from "@/db";
 
 export default function SettingsScreen() {
@@ -44,6 +45,7 @@ export default function SettingsScreen() {
   };
 
   return (
+    <ScreenLayout insideTabs>
     <View style={styles.container}>
       <Text style={[styles.pageTitle, { color: c.text }]}>Settings</Text>
 
@@ -120,6 +122,7 @@ export default function SettingsScreen() {
         )}
       />
     </View>
+    </ScreenLayout>
   );
 }
 
