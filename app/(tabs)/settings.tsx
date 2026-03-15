@@ -17,7 +17,11 @@ export default function SettingsScreen() {
   const { mode, setMode } = useThemeMode();
   const c = useColors();
 
-  const themeOptions: { value: ThemeOption; label: string; icon: keyof typeof MaterialIcons.glyphMap }[] = [
+  const themeOptions: {
+    value: ThemeOption;
+    label: string;
+    icon: keyof typeof MaterialIcons.glyphMap;
+  }[] = [
     { value: "system", label: "System", icon: "smartphone" },
     { value: "light", label: "Light", icon: "light-mode" },
     { value: "dark", label: "Dark", icon: "dark-mode" },
@@ -91,7 +95,12 @@ export default function SettingsScreen() {
             { backgroundColor: c.card, borderColor: c.border },
           ]}
         >
-          <View style={[styles.aboutRow, { borderBottomWidth: 1, borderBottomColor: c.border }]}>
+          <View
+            style={[
+              styles.aboutRow,
+              { borderBottomWidth: 1, borderBottomColor: c.border },
+            ]}
+          >
             <Text style={[styles.aboutLabel, { color: c.textSecondary }]}>
               App
             </Text>
@@ -99,7 +108,12 @@ export default function SettingsScreen() {
               Beastmode
             </Text>
           </View>
-          <View style={[styles.aboutRow, { borderBottomWidth: 1, borderBottomColor: c.border }]}>
+          <View
+            style={[
+              styles.aboutRow,
+              { borderBottomWidth: 1, borderBottomColor: c.border },
+            ]}
+          >
             <Text style={[styles.aboutLabel, { color: c.textSecondary }]}>
               Version
             </Text>
