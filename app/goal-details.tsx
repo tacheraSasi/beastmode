@@ -8,7 +8,12 @@ import {
   StyleSheet,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter, useFocusEffect, type Href } from "expo-router";
+import {
+  useLocalSearchParams,
+  useRouter,
+  useFocusEffect,
+  type Href,
+} from "expo-router";
 import {
   getGoalById,
   getGoalProgress,

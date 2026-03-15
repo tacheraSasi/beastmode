@@ -120,7 +120,7 @@ export default function SessionsScreen() {
                       router.push({
                         pathname: "/session-history",
                         params: { goalId: item.id },
-                    } as Href)
+                      } as Href)
                     }
                   >
                     <Text style={styles.viewAllText}>View All</Text>
