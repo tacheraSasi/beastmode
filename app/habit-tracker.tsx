@@ -18,73 +18,75 @@ export default function HabitTrackerScreen() {
 
   return (
     <ScreenLayout fullScreen>
-    <View style={styles.container}>
-      <DateSelector date={selectedDate} onDateChange={setSelectedDate} />
-      {habitsList.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <View
-            style={[styles.emptyIconWrap, { backgroundColor: c.surfaceAlt }]}
-          >
-            <MaterialIcons
-              name="check-circle-outline"
-              size={40}
-              color={c.textMuted}
-            />
-          </View>
-          <Text style={[styles.emptyTitle, { color: c.text }]}>No habits</Text>
-          <Text style={[styles.emptyText, { color: c.textSecondary }]}>
-            Add some in Settings!
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={dailyHabits}
-          keyExtractor={(item) => item.id.toString()}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingTop: 8 }}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[styles.habitItem, { borderBottomColor: c.border }]}
-              onPress={() => toggleHabit(item.id)}
-              activeOpacity={0.6}
+      <View style={styles.container}>
+        <DateSelector date={selectedDate} onDateChange={setSelectedDate} />
+        {habitsList.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <View
+              style={[styles.emptyIconWrap, { backgroundColor: c.surfaceAlt }]}
             >
-              <View
-                style={[styles.habitLeft, { backgroundColor: "transparent" }]}
+              <MaterialIcons
+                name="check-circle-outline"
+                size={40}
+                color={c.textMuted}
+              />
+            </View>
+            <Text style={[styles.emptyTitle, { color: c.text }]}>
+              No habits
+            </Text>
+            <Text style={[styles.emptyText, { color: c.textSecondary }]}>
+              Add some in Settings!
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={dailyHabits}
+            keyExtractor={(item) => item.id.toString()}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingTop: 8 }}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[styles.habitItem, { borderBottomColor: c.border }]}
+                onPress={() => toggleHabit(item.id)}
+                activeOpacity={0.6}
               >
                 <View
-                  style={[
-                    styles.checkWrap,
-                    {
-                      backgroundColor: item.completed
-                        ? Colors.accent
-                        : "transparent",
-                      borderColor: item.completed ? Colors.accent : c.border,
-                    },
-                  ]}
+                  style={[styles.habitLeft, { backgroundColor: "transparent" }]}
                 >
-                  {item.completed && (
-                    <MaterialIcons name="check" size={16} color="#fff" />
-                  )}
+                  <View
+                    style={[
+                      styles.checkWrap,
+                      {
+                        backgroundColor: item.completed
+                          ? Colors.accent
+                          : "transparent",
+                        borderColor: item.completed ? Colors.accent : c.border,
+                      },
+                    ]}
+                  >
+                    {item.completed && (
+                      <MaterialIcons name="check" size={16} color="#fff" />
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      styles.habitName,
+                      {
+                        color: item.completed ? c.textMuted : c.text,
+                        textDecorationLine: item.completed
+                          ? "line-through"
+                          : "none",
+                      },
+                    ]}
+                  >
+                    {item.name}
+                  </Text>
                 </View>
-                <Text
-                  style={[
-                    styles.habitName,
-                    {
-                      color: item.completed ? c.textMuted : c.text,
-                      textDecorationLine: item.completed
-                        ? "line-through"
-                        : "none",
-                    },
-                  ]}
-                >
-                  {item.name}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          )}
-        />
-      )}
-    </View>
+              </TouchableOpacity>
+            )}
+          />
+        )}
+      </View>
     </ScreenLayout>
   );
 }

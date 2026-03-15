@@ -57,75 +57,77 @@ export default function EditGoalScreen() {
 
   return (
     <ScreenLayout fullScreen keyboardAware>
-    <ScrollView
-      style={[styles.container, { backgroundColor: c.background }]}
-      showsVerticalScrollIndicator={false}
-    >
-      <Text style={[styles.label, { color: c.textSecondary }]}>Goal Name</Text>
-      <TextInput
-        style={[
-          styles.input,
-          {
-            backgroundColor: c.surfaceAlt,
-            borderColor: c.border,
-            color: c.text,
-          },
-        ]}
-        value={name}
-        onChangeText={setName}
-        placeholder="e.g. Learn Guitar"
-        placeholderTextColor={c.textMuted}
-      />
-
-      <Text style={[styles.label, { color: c.textSecondary }]}>Icon</Text>
-      <View style={[styles.iconRow, { backgroundColor: "transparent" }]}>
-        {ICON_OPTIONS.map((ic) => (
-          <TouchableOpacity
-            key={ic}
-            style={[
-              styles.iconBtn,
-              { backgroundColor: c.surfaceAlt },
-              icon === ic && styles.iconBtnSelected,
-            ]}
-            onPress={() => setIcon(ic)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.iconText}>{ic}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <Text style={[styles.label, { color: c.textSecondary }]}>
-        Target Hours
-      </Text>
-      <TextInput
-        style={[
-          styles.input,
-          {
-            backgroundColor: c.surfaceAlt,
-            borderColor: c.border,
-            color: c.text,
-          },
-        ]}
-        value={goalHours}
-        onChangeText={setGoalHours}
-        keyboardType="numeric"
-        placeholder="100"
-        placeholderTextColor={c.textMuted}
-      />
-
-      <TouchableOpacity
-        style={[
-          styles.saveBtn,
-          { backgroundColor: Colors.accent, opacity: name.trim() ? 1 : 0.5 },
-        ]}
-        onPress={handleSave}
-        disabled={!name.trim()}
-        activeOpacity={0.8}
+      <ScrollView
+        style={[styles.container, { backgroundColor: c.background }]}
+        showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.saveBtnText}>Save Changes</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <Text style={[styles.label, { color: c.textSecondary }]}>
+          Goal Name
+        </Text>
+        <TextInput
+          style={[
+            styles.input,
+            {
+              backgroundColor: c.surfaceAlt,
+              borderColor: c.border,
+              color: c.text,
+            },
+          ]}
+          value={name}
+          onChangeText={setName}
+          placeholder="e.g. Learn Guitar"
+          placeholderTextColor={c.textMuted}
+        />
+
+        <Text style={[styles.label, { color: c.textSecondary }]}>Icon</Text>
+        <View style={[styles.iconRow, { backgroundColor: "transparent" }]}>
+          {ICON_OPTIONS.map((ic) => (
+            <TouchableOpacity
+              key={ic}
+              style={[
+                styles.iconBtn,
+                { backgroundColor: c.surfaceAlt },
+                icon === ic && styles.iconBtnSelected,
+              ]}
+              onPress={() => setIcon(ic)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.iconText}>{ic}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={[styles.label, { color: c.textSecondary }]}>
+          Target Hours
+        </Text>
+        <TextInput
+          style={[
+            styles.input,
+            {
+              backgroundColor: c.surfaceAlt,
+              borderColor: c.border,
+              color: c.text,
+            },
+          ]}
+          value={goalHours}
+          onChangeText={setGoalHours}
+          keyboardType="numeric"
+          placeholder="100"
+          placeholderTextColor={c.textMuted}
+        />
+
+        <TouchableOpacity
+          style={[
+            styles.saveBtn,
+            { backgroundColor: Colors.accent, opacity: name.trim() ? 1 : 0.5 },
+          ]}
+          onPress={handleSave}
+          disabled={!name.trim()}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.saveBtnText}>Save Changes</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </ScreenLayout>
   );
 }

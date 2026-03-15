@@ -50,102 +50,109 @@ export default function SessionHistoryScreen() {
 
   return (
     <ScreenLayout fullScreen>
-    <View style={styles.container}>
-      {goal && (
-        <View style={[styles.header, { backgroundColor: "transparent" }]}>
-          <View style={[styles.iconWrap, { backgroundColor: c.surfaceAlt }]}>
-            <Text style={styles.icon}>{goal.icon ?? "🎯"}</Text>
+      <View style={styles.container}>
+        {goal && (
+          <View style={[styles.header, { backgroundColor: "transparent" }]}>
+            <View style={[styles.iconWrap, { backgroundColor: c.surfaceAlt }]}>
+              <Text style={styles.icon}>{goal.icon ?? "🎯"}</Text>
+            </View>
+            <Text style={[styles.goalName, { color: c.text }]}>
+              {goal.name}
+            </Text>
           </View>
-          <Text style={[styles.goalName, { color: c.text }]}>{goal.name}</Text>
-        </View>
-      )}
+        )}
 
-      {sessions.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={[styles.emptyText, { color: c.textSecondary }]}>
-            No sessions yet.
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={sessions}
-          keyExtractor={(item) => item.id.toString()}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
-          renderItem={({ item }) => (
-            <View
-              style={[
-                styles.sessionCard,
-                { backgroundColor: c.card, borderColor: c.border },
-              ]}
-            >
-              <View
-                style={[styles.sessionInfo, { backgroundColor: "transparent" }]}
-              >
-                <Text style={[styles.sessionDate, { color: c.text }]}>
-                  {item.startTime.toLocaleDateString()}
-                </Text>
-                <Text style={[styles.sessionTime, { color: c.textSecondary }]}>
-                  {item.startTime.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                  {item.endTime
-                    ? ` – ${item.endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-                    : ""}
-                </Text>
-                {item.notes ? (
-                  <Text style={[styles.notes, { color: c.textMuted }]}>
-                    {item.notes}
-                  </Text>
-                ) : null}
-              </View>
+        {sessions.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={[styles.emptyText, { color: c.textSecondary }]}>
+              No sessions yet.
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={sessions}
+            keyExtractor={(item) => item.id.toString()}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            renderItem={({ item }) => (
               <View
                 style={[
-                  styles.sessionRight,
-                  { backgroundColor: "transparent" },
+                  styles.sessionCard,
+                  { backgroundColor: c.card, borderColor: c.border },
                 ]}
               >
                 <View
                   style={[
-                    styles.durationBadge,
-                    {
-                      backgroundColor: item.durationSeconds
-                        ? Colors.accentLight
-                        : c.surfaceAlt,
-                    },
+                    styles.sessionInfo,
+                    { backgroundColor: "transparent" },
                   ]}
                 >
+                  <Text style={[styles.sessionDate, { color: c.text }]}>
+                    {item.startTime.toLocaleDateString()}
+                  </Text>
                   <Text
+                    style={[styles.sessionTime, { color: c.textSecondary }]}
+                  >
+                    {item.startTime.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                    {item.endTime
+                      ? ` – ${item.endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                      : ""}
+                  </Text>
+                  {item.notes ? (
+                    <Text style={[styles.notes, { color: c.textMuted }]}>
+                      {item.notes}
+                    </Text>
+                  ) : null}
+                </View>
+                <View
+                  style={[
+                    styles.sessionRight,
+                    { backgroundColor: "transparent" },
+                  ]}
+                >
+                  <View
                     style={[
-                      styles.durationText,
+                      styles.durationBadge,
                       {
-                        color: item.durationSeconds
-                          ? Colors.accent
-                          : c.textMuted,
+                        backgroundColor: item.durationSeconds
+                          ? Colors.accentLight
+                          : c.surfaceAlt,
                       },
                     ]}
                   >
-                    {formatDuration(item.durationSeconds)}
-                  </Text>
+                    <Text
+                      style={[
+                        styles.durationText,
+                        {
+                          color: item.durationSeconds
+                            ? Colors.accent
+                            : c.textMuted,
+                        },
+                      ]}
+                    >
+                      {formatDuration(item.durationSeconds)}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => handleDelete(item)}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    style={{ marginTop: 8 }}
+                  >
+                    <MaterialIcons
+                      name="delete-outline"
+                      size={20}
+                      color={c.danger}
+                    />
+                  </TouchableOpacity>
                 </View>
-                <TouchableOpacity
-                  onPress={() => handleDelete(item)}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  style={{ marginTop: 8 }}
-                >
-                  <MaterialIcons
-                    name="delete-outline"
-                    size={20}
-                    color={c.danger}
-                  />
-                </TouchableOpacity>
               </View>
-            </View>
-          )}
-        />
-      )}
-    </View>
+            )}
+          />
+        )}
+      </View>
     </ScreenLayout>
   );
 }

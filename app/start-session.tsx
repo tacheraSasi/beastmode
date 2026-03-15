@@ -76,93 +76,95 @@ export default function StartSessionScreen() {
   if (!goal) {
     return (
       <ScreenLayout fullScreen>
-      <View style={styles.container}>
-        <Text style={[styles.loadingText, { color: c.textMuted }]}>
-          Loading...
-        </Text>
-      </View>
+        <View style={styles.container}>
+          <Text style={[styles.loadingText, { color: c.textMuted }]}>
+            Loading...
+          </Text>
+        </View>
       </ScreenLayout>
     );
   }
 
   return (
     <ScreenLayout fullScreen>
-    <View style={styles.container}>
-      {/* Goal info */}
-      <View style={[styles.goalInfo, { backgroundColor: "transparent" }]}>
-        <View style={[styles.iconWrap, { backgroundColor: c.surfaceAlt }]}>
-          <Text style={styles.icon}>{goal.icon ?? "🎯"}</Text>
+      <View style={styles.container}>
+        {/* Goal info */}
+        <View style={[styles.goalInfo, { backgroundColor: "transparent" }]}>
+          <View style={[styles.iconWrap, { backgroundColor: c.surfaceAlt }]}>
+            <Text style={styles.icon}>{goal.icon ?? "🎯"}</Text>
+          </View>
+          <Text style={[styles.goalName, { color: c.text }]}>{goal.name}</Text>
         </View>
-        <Text style={[styles.goalName, { color: c.text }]}>{goal.name}</Text>
-      </View>
 
-      {/* Timer */}
-      <View style={[styles.timerContainer, { backgroundColor: "transparent" }]}>
+        {/* Timer */}
         <View
-          style={[
-            styles.timerRing,
-            {
-              borderColor: activeSession ? Colors.accent : c.surfaceAlt,
-            },
-          ]}
+          style={[styles.timerContainer, { backgroundColor: "transparent" }]}
         >
-          <Text style={[styles.timerText, { color: c.text }]}>
-            {formatTime(elapsed)}
-          </Text>
-          {activeSession && (
-            <Text style={[styles.startedAt, { color: c.textMuted }]}>
-              started{" "}
-              {activeSession.startTime.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+          <View
+            style={[
+              styles.timerRing,
+              {
+                borderColor: activeSession ? Colors.accent : c.surfaceAlt,
+              },
+            ]}
+          >
+            <Text style={[styles.timerText, { color: c.text }]}>
+              {formatTime(elapsed)}
             </Text>
+            {activeSession && (
+              <Text style={[styles.startedAt, { color: c.textMuted }]}>
+                started{" "}
+                {activeSession.startTime.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </Text>
+            )}
+          </View>
+        </View>
+
+        {/* Notes */}
+        {!activeSession && (
+          <TextInput
+            style={[
+              styles.notesInput,
+              {
+                backgroundColor: c.surfaceAlt,
+                borderColor: c.border,
+                color: c.text,
+              },
+            ]}
+            placeholder="Session notes (optional)"
+            placeholderTextColor={c.textMuted}
+            value={notes}
+            onChangeText={setNotes}
+            multiline
+          />
+        )}
+
+        {/* Controls */}
+        <View style={[styles.controls, { backgroundColor: "transparent" }]}>
+          {activeSession ? (
+            <TouchableOpacity
+              style={[styles.stopBtn, { backgroundColor: c.danger }]}
+              onPress={handleStop}
+              activeOpacity={0.8}
+            >
+              <MaterialIcons name="stop" size={28} color="#fff" />
+              <Text style={styles.btnText}>Stop Session</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={[styles.startBtn, { backgroundColor: Colors.accent }]}
+              onPress={handleStart}
+              activeOpacity={0.8}
+            >
+              <MaterialIcons name="play-arrow" size={28} color="#fff" />
+              <Text style={styles.btnText}>Start Session</Text>
+            </TouchableOpacity>
           )}
         </View>
       </View>
-
-      {/* Notes */}
-      {!activeSession && (
-        <TextInput
-          style={[
-            styles.notesInput,
-            {
-              backgroundColor: c.surfaceAlt,
-              borderColor: c.border,
-              color: c.text,
-            },
-          ]}
-          placeholder="Session notes (optional)"
-          placeholderTextColor={c.textMuted}
-          value={notes}
-          onChangeText={setNotes}
-          multiline
-        />
-      )}
-
-      {/* Controls */}
-      <View style={[styles.controls, { backgroundColor: "transparent" }]}>
-        {activeSession ? (
-          <TouchableOpacity
-            style={[styles.stopBtn, { backgroundColor: c.danger }]}
-            onPress={handleStop}
-            activeOpacity={0.8}
-          >
-            <MaterialIcons name="stop" size={28} color="#fff" />
-            <Text style={styles.btnText}>Stop Session</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={[styles.startBtn, { backgroundColor: Colors.accent }]}
-            onPress={handleStart}
-            activeOpacity={0.8}
-          >
-            <MaterialIcons name="play-arrow" size={28} color="#fff" />
-            <Text style={styles.btnText}>Start Session</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    </View>
     </ScreenLayout>
   );
 }

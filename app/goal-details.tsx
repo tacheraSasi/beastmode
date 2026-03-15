@@ -72,11 +72,11 @@ export default function GoalDetailsScreen() {
   if (!goal) {
     return (
       <ScreenLayout fullScreen>
-      <View style={styles.container}>
-        <Text style={[styles.loadingText, { color: c.textMuted }]}>
-          Loading...
-        </Text>
-      </View>
+        <View style={styles.container}>
+          <Text style={[styles.loadingText, { color: c.textMuted }]}>
+            Loading...
+          </Text>
+        </View>
       </ScreenLayout>
     );
   }
@@ -88,151 +88,154 @@ export default function GoalDetailsScreen() {
 
   return (
     <ScreenLayout fullScreen>
-    <ScrollView
-      style={[styles.container, { backgroundColor: c.background }]}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Hero */}
-      <View style={[styles.heroCard, { backgroundColor: Colors.accent }]}>
-        <Text style={styles.heroIcon}>{goal.icon ?? "🎯"}</Text>
-        <Text style={styles.heroName}>{goal.name}</Text>
-        <Text style={styles.heroHours}>
-          {progress.totalHours.toFixed(1)}h of {goal.goalHours ?? 100}h
-        </Text>
-        <View style={styles.heroProgressBg}>
-          <View
-            style={[styles.heroProgressFill, { width: `${percentage}%` }]}
-          />
+      <ScrollView
+        style={[styles.container, { backgroundColor: c.background }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Hero */}
+        <View style={[styles.heroCard, { backgroundColor: Colors.accent }]}>
+          <Text style={styles.heroIcon}>{goal.icon ?? "🎯"}</Text>
+          <Text style={styles.heroName}>{goal.name}</Text>
+          <Text style={styles.heroHours}>
+            {progress.totalHours.toFixed(1)}h of {goal.goalHours ?? 100}h
+          </Text>
+          <View style={styles.heroProgressBg}>
+            <View
+              style={[styles.heroProgressFill, { width: `${percentage}%` }]}
+            />
+          </View>
+          <Text style={styles.heroPercent}>{percentage}% complete</Text>
         </View>
-        <Text style={styles.heroPercent}>{percentage}% complete</Text>
-      </View>
 
-      {/* Actions */}
-      <View style={[styles.actions, { backgroundColor: "transparent" }]}>
-        {activeSession ? (
-          <TouchableOpacity
-            style={[styles.primaryBtn, { backgroundColor: c.danger }]}
-            onPress={() =>
-              router.push({
-                pathname: "/start-session",
-                params: { goalId: goal.id },
-              } as Href)
-            }
-            activeOpacity={0.8}
-          >
-            <View style={styles.liveDotWrap}>
-              <View style={styles.liveDot} />
-            </View>
-            <Text style={styles.primaryBtnText}>Resume Session</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={[styles.primaryBtn, { backgroundColor: Colors.accent }]}
-            onPress={() =>
-              router.push({
-                pathname: "/start-session",
-                params: { goalId: goal.id },
-              } as Href)
-            }
-            activeOpacity={0.8}
-          >
-            <MaterialIcons name="play-arrow" size={22} color="#fff" />
-            <Text style={styles.primaryBtnText}>Start Session</Text>
-          </TouchableOpacity>
+        {/* Actions */}
+        <View style={[styles.actions, { backgroundColor: "transparent" }]}>
+          {activeSession ? (
+            <TouchableOpacity
+              style={[styles.primaryBtn, { backgroundColor: c.danger }]}
+              onPress={() =>
+                router.push({
+                  pathname: "/start-session",
+                  params: { goalId: goal.id },
+                } as Href)
+              }
+              activeOpacity={0.8}
+            >
+              <View style={styles.liveDotWrap}>
+                <View style={styles.liveDot} />
+              </View>
+              <Text style={styles.primaryBtnText}>Resume Session</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={[styles.primaryBtn, { backgroundColor: Colors.accent }]}
+              onPress={() =>
+                router.push({
+                  pathname: "/start-session",
+                  params: { goalId: goal.id },
+                } as Href)
+              }
+              activeOpacity={0.8}
+            >
+              <MaterialIcons name="play-arrow" size={22} color="#fff" />
+              <Text style={styles.primaryBtnText}>Start Session</Text>
+            </TouchableOpacity>
+          )}
+
+          <View style={[styles.btnRow, { backgroundColor: "transparent" }]}>
+            <TouchableOpacity
+              style={[
+                styles.outlineBtn,
+                {
+                  borderColor: c.border,
+                  backgroundColor: c.card,
+                  flex: 1,
+                  marginRight: 6,
+                },
+              ]}
+              onPress={() =>
+                router.push({
+                  pathname: "/edit-goal",
+                  params: { id: goal.id },
+                } as Href)
+              }
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="edit" size={18} color={Colors.accent} />
+              <Text style={[styles.outlineBtnText, { color: Colors.accent }]}>
+                Edit
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.outlineBtn,
+                {
+                  borderColor: c.border,
+                  backgroundColor: c.card,
+                  flex: 1,
+                  marginLeft: 6,
+                },
+              ]}
+              onPress={() =>
+                router.push({
+                  pathname: "/session-history",
+                  params: { goalId: goal.id },
+                } as Href)
+              }
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="history" size={18} color={Colors.accent} />
+              <Text style={[styles.outlineBtnText, { color: Colors.accent }]}>
+                History
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Recent Sessions */}
+        {recentSessions.length > 0 && (
+          <View style={[styles.section, { backgroundColor: "transparent" }]}>
+            <Text style={[styles.sectionTitle, { color: c.text }]}>
+              Recent Sessions
+            </Text>
+            {recentSessions.map((s) => (
+              <View
+                key={s.id}
+                style={[
+                  styles.sessionRow,
+                  {
+                    borderBottomColor: c.border,
+                    backgroundColor: "transparent",
+                  },
+                ]}
+              >
+                <View style={{ backgroundColor: "transparent" }}>
+                  <Text style={[styles.sessionDate, { color: c.text }]}>
+                    {s.startTime.toLocaleDateString()}
+                  </Text>
+                  {s.notes ? (
+                    <Text style={[styles.sessionNotes, { color: c.textMuted }]}>
+                      {s.notes}
+                    </Text>
+                  ) : null}
+                </View>
+                <Text style={[styles.sessionDuration, { color: c.text }]}>
+                  {formatDuration(s.durationSeconds)}
+                </Text>
+              </View>
+            ))}
+          </View>
         )}
 
-        <View style={[styles.btnRow, { backgroundColor: "transparent" }]}>
-          <TouchableOpacity
-            style={[
-              styles.outlineBtn,
-              {
-                borderColor: c.border,
-                backgroundColor: c.card,
-                flex: 1,
-                marginRight: 6,
-              },
-            ]}
-            onPress={() =>
-              router.push({
-                pathname: "/edit-goal",
-                params: { id: goal.id },
-              } as Href)
-            }
-            activeOpacity={0.7}
-          >
-            <MaterialIcons name="edit" size={18} color={Colors.accent} />
-            <Text style={[styles.outlineBtnText, { color: Colors.accent }]}>
-              Edit
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.outlineBtn,
-              {
-                borderColor: c.border,
-                backgroundColor: c.card,
-                flex: 1,
-                marginLeft: 6,
-              },
-            ]}
-            onPress={() =>
-              router.push({
-                pathname: "/session-history",
-                params: { goalId: goal.id },
-              } as Href)
-            }
-            activeOpacity={0.7}
-          >
-            <MaterialIcons name="history" size={18} color={Colors.accent} />
-            <Text style={[styles.outlineBtnText, { color: Colors.accent }]}>
-              History
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Recent Sessions */}
-      {recentSessions.length > 0 && (
-        <View style={[styles.section, { backgroundColor: "transparent" }]}>
-          <Text style={[styles.sectionTitle, { color: c.text }]}>
-            Recent Sessions
+        {/* Delete */}
+        <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
+          <MaterialIcons name="delete-outline" size={18} color={c.danger} />
+          <Text style={[styles.deleteBtnText, { color: c.danger }]}>
+            Delete Goal
           </Text>
-          {recentSessions.map((s) => (
-            <View
-              key={s.id}
-              style={[
-                styles.sessionRow,
-                { borderBottomColor: c.border, backgroundColor: "transparent" },
-              ]}
-            >
-              <View style={{ backgroundColor: "transparent" }}>
-                <Text style={[styles.sessionDate, { color: c.text }]}>
-                  {s.startTime.toLocaleDateString()}
-                </Text>
-                {s.notes ? (
-                  <Text style={[styles.sessionNotes, { color: c.textMuted }]}>
-                    {s.notes}
-                  </Text>
-                ) : null}
-              </View>
-              <Text style={[styles.sessionDuration, { color: c.text }]}>
-                {formatDuration(s.durationSeconds)}
-              </Text>
-            </View>
-          ))}
-        </View>
-      )}
+        </TouchableOpacity>
 
-      {/* Delete */}
-      <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
-        <MaterialIcons name="delete-outline" size={18} color={c.danger} />
-        <Text style={[styles.deleteBtnText, { color: c.danger }]}>
-          Delete Goal
-        </Text>
-      </TouchableOpacity>
-
-      <View style={{ height: 40, backgroundColor: "transparent" }} />
-    </ScrollView>
+        <View style={{ height: 40, backgroundColor: "transparent" }} />
+      </ScrollView>
     </ScreenLayout>
   );
 }
