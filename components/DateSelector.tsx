@@ -1,5 +1,7 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { TouchableOpacity, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { View, Text, useColors } from "@/components/Themed";
+import Colors from "@/constants/Colors";
 
 interface DateSelectorProps {
   date: Date;
@@ -7,6 +9,8 @@ interface DateSelectorProps {
 }
 
 export function DateSelector({ date, onDateChange }: DateSelectorProps) {
+  const c = useColors();
+
   const formatDate = () => {
     return date.toLocaleString("en-US", {
       month: "short",
@@ -25,17 +29,32 @@ export function DateSelector({ date, onDateChange }: DateSelectorProps) {
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={handlePrevDay} style={styles.arrowButton} accessibilityLabel="Previous day">
-        <MaterialIcons name="chevron-left" size={28} color="#2196F3" />
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: c.card, borderColor: c.border },
+      ]}
+    >
+      <TouchableOpacity
+        onPress={handlePrevDay}
+        style={styles.arrowButton}
+        accessibilityLabel="Previous day"
+        activeOpacity={0.7}
+      >
+        <MaterialIcons name="chevron-left" size={28} color={Colors.accent} />
       </TouchableOpacity>
 
-      <View style={styles.dateContainer}>
-        <Text style={styles.dateText}>{formatDate()}</Text>
+      <View style={[styles.dateContainer, { backgroundColor: "transparent" }]}>
+        <Text style={[styles.dateText, { color: c.text }]}>{formatDate()}</Text>
       </View>
 
-      <TouchableOpacity onPress={handleNextDay} style={styles.arrowButton} accessibilityLabel="Next day">
-        <MaterialIcons name="chevron-right" size={28} color="#2196F3" />
+      <TouchableOpacity
+        onPress={handleNextDay}
+        style={styles.arrowButton}
+        accessibilityLabel="Next day"
+        activeOpacity={0.7}
+      >
+        <MaterialIcons name="chevron-right" size={28} color={Colors.accent} />
       </TouchableOpacity>
     </View>
   );
@@ -47,33 +66,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    paddingVertical: 10,
+    borderRadius: 14,
+    borderWidth: 1,
   },
   arrowButton: {
-    padding: 8,
+    padding: 6,
   },
   dateContainer: {
     flex: 1,
     alignItems: "center",
   },
   dateText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#212121",
-  },
-  subText: {
-    fontSize: 14,
-    color: "#757575",
-    marginTop: 2,
+    fontSize: 17,
+    fontWeight: "700",
+    letterSpacing: -0.3,
   },
 });

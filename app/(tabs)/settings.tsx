@@ -177,17 +177,4 @@ const styles = StyleSheet.create({
   habitLeft: { flexDirection: "row", alignItems: "center", flex: 1 },
   habitDot: { width: 8, height: 8, borderRadius: 4, marginRight: 12 },
   habitName: { fontSize: 16, fontWeight: "500" },
-});
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
-  },
-  habitName: {
-    fontSize: 16,
-    color: "#212121",
-  },
-});
+})

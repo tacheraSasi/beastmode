@@ -1,12 +1,5 @@
 import { useCallback, useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  StyleSheet,
-} from "react-native";
+import { ScrollView, TouchableOpacity, Alert, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import {
   useLocalSearchParams,
@@ -21,6 +14,8 @@ import {
   deleteGoal,
   getActiveSession,
 } from "@/db";
+import { View, Text, useColors } from "@/components/Themed";
+import Colors from "@/constants/Colors";
 import type { Goal, Session } from "@/db";
 
 export default function GoalDetailsScreen() {
@@ -30,6 +25,7 @@ export default function GoalDetailsScreen() {
   const [progress, setProgress] = useState({ totalHours: 0, totalSeconds: 0 });
   const [recentSessions, setRecentSessions] = useState<Session[]>([]);
   const [activeSession, setActiveSession] = useState<Session | null>(null);
+  const c = useColors();
 
   useFocusEffect(
     useCallback(() => {
@@ -75,7 +71,9 @@ export default function GoalDetailsScreen() {
   if (!goal) {
     return (
       <View style={styles.container}>
-        <Text style={styles.loadingText}>Loading...</Text>
+        <Text style={[styles.loadingText, { color: c.textMuted }]}>
+          Loading...
+        </Text>
       </View>
     );
   }
@@ -86,90 +84,134 @@ export default function GoalDetailsScreen() {
   );
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.headerSection}>
-        <Text style={styles.icon}>{goal.icon ?? "🎯"}</Text>
-        <Text style={styles.name}>{goal.name}</Text>
-        <Text style={styles.hours}>
-          {progress.totalHours.toFixed(1)} / {goal.goalHours ?? 100} hours
+    <ScrollView
+      style={[styles.container, { backgroundColor: c.background }]}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Hero */}
+      <View style={[styles.heroCard, { backgroundColor: Colors.accent }]}>
+        <Text style={styles.heroIcon}>{goal.icon ?? "🎯"}</Text>
+        <Text style={styles.heroName}>{goal.name}</Text>
+        <Text style={styles.heroHours}>
+          {progress.totalHours.toFixed(1)}h of {goal.goalHours ?? 100}h
         </Text>
-        <View style={styles.progressBarBg}>
-          <View style={[styles.progressBarFill, { width: `${percentage}%` }]} />
+        <View style={styles.heroProgressBg}>
+          <View
+            style={[styles.heroProgressFill, { width: `${percentage}%` }]}
+          />
         </View>
-        <Text style={styles.percentText}>{percentage}% complete</Text>
+        <Text style={styles.heroPercent}>{percentage}% complete</Text>
       </View>
 
-      <View style={styles.actions}>
+      {/* Actions */}
+      <View style={[styles.actions, { backgroundColor: "transparent" }]}>
         {activeSession ? (
           <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: "#F44336" }]}
+            style={[styles.primaryBtn, { backgroundColor: c.danger }]}
             onPress={() =>
               router.push({
                 pathname: "/start-session",
                 params: { goalId: goal.id },
               } as Href)
             }
+            activeOpacity={0.8}
           >
-            <MaterialIcons name="fiber-manual-record" size={18} color="#fff" />
-            <Text style={styles.actionBtnText}>Resume Session</Text>
+            <View style={styles.liveDotWrap}>
+              <View style={styles.liveDot} />
+            </View>
+            <Text style={styles.primaryBtnText}>Resume Session</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: "#4CAF50" }]}
+            style={[styles.primaryBtn, { backgroundColor: Colors.accent }]}
             onPress={() =>
               router.push({
                 pathname: "/start-session",
                 params: { goalId: goal.id },
               } as Href)
             }
+            activeOpacity={0.8}
           >
-            <MaterialIcons name="play-arrow" size={18} color="#fff" />
-            <Text style={styles.actionBtnText}>Start Session</Text>
+            <MaterialIcons name="play-arrow" size={22} color="#fff" />
+            <Text style={styles.primaryBtnText}>Start Session</Text>
           </TouchableOpacity>
         )}
 
-        <View style={styles.row}>
+        <View style={[styles.btnRow, { backgroundColor: "transparent" }]}>
           <TouchableOpacity
-            style={[styles.secondaryBtn, { flex: 1, marginRight: 6 }]}
+            style={[
+              styles.outlineBtn,
+              {
+                borderColor: c.border,
+                backgroundColor: c.card,
+                flex: 1,
+                marginRight: 6,
+              },
+            ]}
             onPress={() =>
               router.push({
                 pathname: "/edit-goal",
                 params: { id: goal.id },
               } as Href)
             }
+            activeOpacity={0.7}
           >
-            <MaterialIcons name="edit" size={18} color="#2196F3" />
-            <Text style={styles.secondaryBtnText}>Edit</Text>
+            <MaterialIcons name="edit" size={18} color={Colors.accent} />
+            <Text style={[styles.outlineBtnText, { color: Colors.accent }]}>
+              Edit
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.secondaryBtn, { flex: 1, marginLeft: 6 }]}
+            style={[
+              styles.outlineBtn,
+              {
+                borderColor: c.border,
+                backgroundColor: c.card,
+                flex: 1,
+                marginLeft: 6,
+              },
+            ]}
             onPress={() =>
               router.push({
                 pathname: "/session-history",
                 params: { goalId: goal.id },
               } as Href)
             }
+            activeOpacity={0.7}
           >
-            <MaterialIcons name="history" size={18} color="#2196F3" />
-            <Text style={styles.secondaryBtnText}>History</Text>
+            <MaterialIcons name="history" size={18} color={Colors.accent} />
+            <Text style={[styles.outlineBtnText, { color: Colors.accent }]}>
+              History
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
 
+      {/* Recent Sessions */}
       {recentSessions.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Sessions</Text>
+        <View style={[styles.section, { backgroundColor: "transparent" }]}>
+          <Text style={[styles.sectionTitle, { color: c.text }]}>
+            Recent Sessions
+          </Text>
           {recentSessions.map((s) => (
-            <View key={s.id} style={styles.sessionRow}>
-              <View>
-                <Text style={styles.sessionDate}>
+            <View
+              key={s.id}
+              style={[
+                styles.sessionRow,
+                { borderBottomColor: c.border, backgroundColor: "transparent" },
+              ]}
+            >
+              <View style={{ backgroundColor: "transparent" }}>
+                <Text style={[styles.sessionDate, { color: c.text }]}>
                   {s.startTime.toLocaleDateString()}
                 </Text>
                 {s.notes ? (
-                  <Text style={styles.sessionNotes}>{s.notes}</Text>
+                  <Text style={[styles.sessionNotes, { color: c.textMuted }]}>
+                    {s.notes}
+                  </Text>
                 ) : null}
               </View>
-              <Text style={styles.sessionDuration}>
+              <Text style={[styles.sessionDuration, { color: c.text }]}>
                 {formatDuration(s.durationSeconds)}
               </Text>
             </View>
@@ -177,85 +219,117 @@ export default function GoalDetailsScreen() {
         </View>
       )}
 
+      {/* Delete */}
       <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
-        <MaterialIcons name="delete" size={18} color="#F44336" />
-        <Text style={styles.deleteBtnText}>Delete Goal</Text>
+        <MaterialIcons name="delete-outline" size={18} color={c.danger} />
+        <Text style={[styles.deleteBtnText, { color: c.danger }]}>
+          Delete Goal
+        </Text>
       </TouchableOpacity>
+
+      <View style={{ height: 40, backgroundColor: "transparent" }} />
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 16 },
-  loadingText: { textAlign: "center", marginTop: 40, color: "#999" },
-  headerSection: { alignItems: "center", marginBottom: 24 },
-  icon: { fontSize: 48, marginBottom: 8 },
-  name: { fontSize: 24, fontWeight: "bold", color: "#212121" },
-  hours: { fontSize: 16, color: "#757575", marginTop: 4, marginBottom: 12 },
-  progressBarBg: {
+  container: { flex: 1, paddingHorizontal: 20 },
+  loadingText: { textAlign: "center", marginTop: 40 },
+  heroCard: {
+    borderRadius: 20,
+    padding: 28,
+    alignItems: "center",
+    marginTop: 8,
+    marginBottom: 24,
+    shadowColor: "#E73B37",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  heroIcon: { fontSize: 48, marginBottom: 8 },
+  heroName: { fontSize: 24, fontWeight: "800", color: "#fff" },
+  heroHours: {
+    fontSize: 15,
+    color: "rgba(255,255,255,0.8)",
+    marginTop: 4,
+    marginBottom: 16,
+  },
+  heroProgressBg: {
     width: "100%",
-    height: 10,
-    backgroundColor: "#E0E0E0",
-    borderRadius: 5,
+    height: 8,
+    backgroundColor: "rgba(255,255,255,0.25)",
+    borderRadius: 4,
     overflow: "hidden",
   },
-  progressBarFill: { height: 10, backgroundColor: "#4CAF50", borderRadius: 5 },
-  percentText: {
+  heroProgressFill: {
+    height: 8,
+    backgroundColor: "#fff",
+    borderRadius: 4,
+  },
+  heroPercent: {
     fontSize: 14,
-    color: "#4CAF50",
-    marginTop: 6,
-    fontWeight: "600",
+    color: "rgba(255,255,255,0.9)",
+    fontWeight: "700",
+    marginTop: 8,
   },
   actions: { marginBottom: 24 },
-  actionBtn: {
+  primaryBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    borderRadius: 14,
+    marginBottom: 10,
+    shadowColor: "#E73B37",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  liveDotWrap: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "rgba(255,255,255,0.25)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 8,
+  },
+  liveDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: "#fff" },
+  primaryBtnText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 16,
+    marginLeft: 4,
+  },
+  btnRow: { flexDirection: "row" },
+  outlineBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 14,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  actionBtnText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-    marginLeft: 6,
-  },
-  row: { flexDirection: "row" },
-  secondaryBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 12,
-    borderRadius: 10,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#2196F3",
   },
-  secondaryBtnText: { color: "#2196F3", fontWeight: "600", marginLeft: 4 },
+  outlineBtnText: { fontWeight: "600", marginLeft: 6 },
   section: { marginBottom: 24 },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#212121",
-    marginBottom: 10,
-  },
+  sectionTitle: { fontSize: 18, fontWeight: "700", marginBottom: 12 },
   sessionRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
   },
-  sessionDate: { fontSize: 14, color: "#212121" },
-  sessionNotes: { fontSize: 12, color: "#999", marginTop: 2 },
-  sessionDuration: { fontSize: 14, fontWeight: "600", color: "#212121" },
+  sessionDate: { fontSize: 15, fontWeight: "500" },
+  sessionNotes: { fontSize: 13, marginTop: 2 },
+  sessionDuration: { fontSize: 15, fontWeight: "700" },
   deleteBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 14,
-    marginBottom: 40,
   },
-  deleteBtnText: { color: "#F44336", fontWeight: "600", marginLeft: 4 },
+  deleteBtnText: { fontWeight: "600", marginLeft: 4 },
 });

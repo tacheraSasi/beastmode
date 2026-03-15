@@ -1,21 +1,17 @@
 import { useCallback, useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Alert,
-  StyleSheet,
-} from "react-native";
+import { FlatList, TouchableOpacity, Alert, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useFocusEffect } from "expo-router";
 import { getGoalById, getSessionsByGoal, deleteSession } from "@/db";
+import { View, Text, useColors } from "@/components/Themed";
+import Colors from "@/constants/Colors";
 import type { Goal, Session } from "@/db";
 
 export default function SessionHistoryScreen() {
   const { goalId } = useLocalSearchParams<{ goalId: string }>();
   const [goal, setGoal] = useState<Goal | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
+  const c = useColors();
 
   const load = useCallback(async () => {
     if (!goalId) return;
@@ -54,27 +50,40 @@ export default function SessionHistoryScreen() {
   return (
     <View style={styles.container}>
       {goal && (
-        <View style={styles.header}>
-          <Text style={styles.icon}>{goal.icon ?? "🎯"}</Text>
-          <Text style={styles.goalName}>{goal.name}</Text>
+        <View style={[styles.header, { backgroundColor: "transparent" }]}>
+          <View style={[styles.iconWrap, { backgroundColor: c.surfaceAlt }]}>
+            <Text style={styles.icon}>{goal.icon ?? "🎯"}</Text>
+          </View>
+          <Text style={[styles.goalName, { color: c.text }]}>{goal.name}</Text>
         </View>
       )}
 
       {sessions.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No sessions yet.</Text>
+          <Text style={[styles.emptyText, { color: c.textSecondary }]}>
+            No sessions yet.
+          </Text>
         </View>
       ) : (
         <FlatList
           data={sessions}
           keyExtractor={(item) => item.id.toString()}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 20 }}
           renderItem={({ item }) => (
-            <View style={styles.sessionCard}>
-              <View style={styles.sessionInfo}>
-                <Text style={styles.sessionDate}>
+            <View
+              style={[
+                styles.sessionCard,
+                { backgroundColor: c.card, borderColor: c.border },
+              ]}
+            >
+              <View
+                style={[styles.sessionInfo, { backgroundColor: "transparent" }]}
+              >
+                <Text style={[styles.sessionDate, { color: c.text }]}>
                   {item.startTime.toLocaleDateString()}
                 </Text>
-                <Text style={styles.sessionTime}>
+                <Text style={[styles.sessionTime, { color: c.textSecondary }]}>
                   {item.startTime.toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -84,18 +93,49 @@ export default function SessionHistoryScreen() {
                     : ""}
                 </Text>
                 {item.notes ? (
-                  <Text style={styles.notes}>{item.notes}</Text>
+                  <Text style={[styles.notes, { color: c.textMuted }]}>
+                    {item.notes}
+                  </Text>
                 ) : null}
               </View>
-              <View style={styles.sessionRight}>
-                <Text style={styles.duration}>
-                  {formatDuration(item.durationSeconds)}
-                </Text>
-                <TouchableOpacity onPress={() => handleDelete(item)}>
+              <View
+                style={[
+                  styles.sessionRight,
+                  { backgroundColor: "transparent" },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.durationBadge,
+                    {
+                      backgroundColor: item.durationSeconds
+                        ? Colors.accentLight
+                        : c.surfaceAlt,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.durationText,
+                      {
+                        color: item.durationSeconds
+                          ? Colors.accent
+                          : c.textMuted,
+                      },
+                    ]}
+                  >
+                    {formatDuration(item.durationSeconds)}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => handleDelete(item)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  style={{ marginTop: 8 }}
+                >
                   <MaterialIcons
                     name="delete-outline"
                     size={20}
-                    color="#F44336"
+                    color={c.danger}
                   />
                 </TouchableOpacity>
               </View>
@@ -108,27 +148,50 @@ export default function SessionHistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 16 },
+  container: { flex: 1, paddingHorizontal: 20, paddingTop: 8 },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 20,
   },
-  icon: { fontSize: 28, marginRight: 8 },
-  goalName: { fontSize: 20, fontWeight: "bold", color: "#212121" },
-  emptyContainer: { flex: 1, alignItems: "center", justifyContent: "center" },
-  emptyText: { fontSize: 16, color: "#999" },
+  iconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  icon: { fontSize: 20 },
+  goalName: { fontSize: 20, fontWeight: "700" },
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+  },
+  emptyText: { fontSize: 16 },
   sessionCard: {
     flexDirection: "row",
-    backgroundColor: "#F5F5F5",
-    borderRadius: 10,
+    borderRadius: 14,
     padding: 14,
-    marginBottom: 8,
+    marginBottom: 10,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
   },
   sessionInfo: { flex: 1 },
-  sessionDate: { fontSize: 15, fontWeight: "600", color: "#212121" },
-  sessionTime: { fontSize: 13, color: "#757575", marginTop: 2 },
-  notes: { fontSize: 13, color: "#999", marginTop: 4 },
+  sessionDate: { fontSize: 15, fontWeight: "600" },
+  sessionTime: { fontSize: 13, marginTop: 3 },
+  notes: { fontSize: 13, marginTop: 4, fontStyle: "italic" },
   sessionRight: { alignItems: "flex-end", justifyContent: "space-between" },
-  duration: { fontSize: 16, fontWeight: "bold", color: "#212121" },
+  durationBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  durationText: { fontSize: 14, fontWeight: "700" },
 });

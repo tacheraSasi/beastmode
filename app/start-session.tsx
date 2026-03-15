@@ -1,14 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  StyleSheet,
-} from "react-native";
+import { TouchableOpacity, TextInput, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { getGoalById, getActiveSession, startSession, endSession } from "@/db";
+import { View, Text, useColors } from "@/components/Themed";
+import Colors from "@/constants/Colors";
 import type { Goal, Session } from "@/db";
 
 export default function StartSessionScreen() {
@@ -19,6 +15,7 @@ export default function StartSessionScreen() {
   const [elapsed, setElapsed] = useState(0);
   const [notes, setNotes] = useState("");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const c = useColors();
 
   useFocusEffect(
     useCallback(() => {
@@ -78,46 +75,85 @@ export default function StartSessionScreen() {
   if (!goal) {
     return (
       <View style={styles.container}>
-        <Text style={styles.loadingText}>Loading...</Text>
+        <Text style={[styles.loadingText, { color: c.textMuted }]}>
+          Loading...
+        </Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <View style={styles.goalInfo}>
-        <Text style={styles.icon}>{goal.icon ?? "🎯"}</Text>
-        <Text style={styles.goalName}>{goal.name}</Text>
+      {/* Goal info */}
+      <View style={[styles.goalInfo, { backgroundColor: "transparent" }]}>
+        <View style={[styles.iconWrap, { backgroundColor: c.surfaceAlt }]}>
+          <Text style={styles.icon}>{goal.icon ?? "🎯"}</Text>
+        </View>
+        <Text style={[styles.goalName, { color: c.text }]}>{goal.name}</Text>
       </View>
 
-      <View style={styles.timerContainer}>
-        <Text style={styles.timerText}>{formatTime(elapsed)}</Text>
-        {activeSession && (
-          <Text style={styles.startedAt}>
-            Started at {activeSession.startTime.toLocaleTimeString()}
+      {/* Timer */}
+      <View style={[styles.timerContainer, { backgroundColor: "transparent" }]}>
+        <View
+          style={[
+            styles.timerRing,
+            {
+              borderColor: activeSession ? Colors.accent : c.surfaceAlt,
+            },
+          ]}
+        >
+          <Text style={[styles.timerText, { color: c.text }]}>
+            {formatTime(elapsed)}
           </Text>
-        )}
+          {activeSession && (
+            <Text style={[styles.startedAt, { color: c.textMuted }]}>
+              started{" "}
+              {activeSession.startTime.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </Text>
+          )}
+        </View>
       </View>
 
+      {/* Notes */}
       {!activeSession && (
         <TextInput
-          style={styles.notesInput}
+          style={[
+            styles.notesInput,
+            {
+              backgroundColor: c.surfaceAlt,
+              borderColor: c.border,
+              color: c.text,
+            },
+          ]}
           placeholder="Session notes (optional)"
+          placeholderTextColor={c.textMuted}
           value={notes}
           onChangeText={setNotes}
           multiline
         />
       )}
 
-      <View style={styles.controls}>
+      {/* Controls */}
+      <View style={[styles.controls, { backgroundColor: "transparent" }]}>
         {activeSession ? (
-          <TouchableOpacity style={styles.stopBtn} onPress={handleStop}>
-            <MaterialIcons name="stop" size={32} color="#fff" />
+          <TouchableOpacity
+            style={[styles.stopBtn, { backgroundColor: c.danger }]}
+            onPress={handleStop}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="stop" size={28} color="#fff" />
             <Text style={styles.btnText}>Stop Session</Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity style={styles.startBtn} onPress={handleStart}>
-            <MaterialIcons name="play-arrow" size={32} color="#fff" />
+          <TouchableOpacity
+            style={[styles.startBtn, { backgroundColor: Colors.accent }]}
+            onPress={handleStart}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="play-arrow" size={28} color="#fff" />
             <Text style={styles.btnText}>Start Session</Text>
           </TouchableOpacity>
         )}
@@ -127,50 +163,68 @@ export default function StartSessionScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 16 },
-  loadingText: { textAlign: "center", marginTop: 40, color: "#999" },
-  goalInfo: { alignItems: "center", marginTop: 20 },
-  icon: { fontSize: 48 },
-  goalName: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#212121",
-    marginTop: 8,
+  container: { flex: 1, paddingHorizontal: 20, paddingTop: 16 },
+  loadingText: { textAlign: "center", marginTop: 40 },
+  goalInfo: { alignItems: "center", marginTop: 10 },
+  iconWrap: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  timerContainer: { alignItems: "center", marginTop: 40 },
+  icon: { fontSize: 32 },
+  goalName: { fontSize: 22, fontWeight: "800", marginTop: 10 },
+  timerContainer: { alignItems: "center", marginTop: 32 },
+  timerRing: {
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    borderWidth: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+  },
   timerText: {
-    fontSize: 64,
-    fontWeight: "200",
-    color: "#212121",
+    fontSize: 48,
+    fontWeight: "300",
     fontVariant: ["tabular-nums"],
+    letterSpacing: 1,
   },
-  startedAt: { fontSize: 14, color: "#999", marginTop: 8 },
+  startedAt: { fontSize: 13, marginTop: 6 },
   notesInput: {
     borderWidth: 1,
-    borderColor: "#E0E0E0",
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    marginTop: 30,
-    minHeight: 60,
+    borderRadius: 14,
+    padding: 14,
+    fontSize: 15,
+    marginTop: 28,
+    minHeight: 56,
     textAlignVertical: "top",
   },
   controls: { flex: 1, justifyContent: "center", alignItems: "center" },
   startBtn: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#4CAF50",
-    paddingVertical: 16,
-    paddingHorizontal: 40,
-    borderRadius: 30,
+    paddingVertical: 18,
+    paddingHorizontal: 44,
+    borderRadius: 28,
+    shadowColor: "#E73B37",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 8,
   },
   stopBtn: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F44336",
-    paddingVertical: 16,
-    paddingHorizontal: 40,
-    borderRadius: 30,
+    paddingVertical: 18,
+    paddingHorizontal: 44,
+    borderRadius: 28,
+    shadowColor: "#EF4444",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  btnText: { color: "#fff", fontSize: 20, fontWeight: "bold", marginLeft: 8 },
+  btnText: { color: "#fff", fontSize: 18, fontWeight: "700", marginLeft: 8 },
 });

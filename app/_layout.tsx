@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/components/useColorScheme";
+import Colors from "@/constants/Colors";
 import { db, expo_sqlite } from "@/db";
 import migrations from "@/drizzle/migrations";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
@@ -61,11 +62,25 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <HabitsProvider>
-        <Stack>
+        <Stack
+          screenOptions={{
+            headerStyle: { backgroundColor: theme.background },
+            headerTintColor: Colors.accent,
+            headerTitleStyle: {
+              fontWeight: "700",
+              fontSize: 17,
+              color: theme.text,
+            },
+            headerShadowVisible: false,
+            headerBackTitleVisible: false,
+            contentStyle: { backgroundColor: theme.background },
+          }}
+        >
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen
             name="goal-details"

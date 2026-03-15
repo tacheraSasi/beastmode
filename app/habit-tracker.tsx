@@ -1,13 +1,9 @@
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useHabits } from "@/context/habits-context";
 import { DateSelector } from "@/components/DateSelector";
+import { View, Text, useColors } from "@/components/Themed";
+import Colors from "@/constants/Colors";
 
 export default function HabitTrackerScreen() {
   const {
@@ -17,34 +13,63 @@ export default function HabitTrackerScreen() {
     setSelectedDate,
     toggleHabit,
   } = useHabits();
+  const c = useColors();
 
   return (
     <View style={styles.container}>
       <DateSelector date={selectedDate} onDateChange={setSelectedDate} />
       {habitsList.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <MaterialIcons name="check-circle-outline" size={64} color="#ccc" />
-          <Text style={styles.emptyText}>
-            No habits yet. Add some in Settings!
+          <View style={[styles.emptyIconWrap, { backgroundColor: c.surfaceAlt }]}>
+            <MaterialIcons name="check-circle-outline" size={40} color={c.textMuted} />
+          </View>
+          <Text style={[styles.emptyTitle, { color: c.text }]}>No habits</Text>
+          <Text style={[styles.emptyText, { color: c.textSecondary }]}>
+            Add some in Settings!
           </Text>
         </View>
       ) : (
         <FlatList
           data={dailyHabits}
           keyExtractor={(item) => item.id.toString()}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingTop: 8 }}
           renderItem={({ item }) => (
             <TouchableOpacity
-              style={styles.habitItem}
+              style={[styles.habitItem, { borderBottomColor: c.border }]}
               onPress={() => toggleHabit(item.id)}
+              activeOpacity={0.6}
             >
-              <Text style={styles.habitName}>{item.name}</Text>
-              <MaterialIcons
-                name={
-                  item.completed ? "check-circle" : "radio-button-unchecked"
-                }
-                size={24}
-                color={item.completed ? "#4CAF50" : "#757575"}
-              />
+              <View style={[styles.habitLeft, { backgroundColor: "transparent" }]}>
+                <View
+                  style={[
+                    styles.checkWrap,
+                    {
+                      backgroundColor: item.completed
+                        ? Colors.accent
+                        : "transparent",
+                      borderColor: item.completed ? Colors.accent : c.border,
+                    },
+                  ]}
+                >
+                  {item.completed && (
+                    <MaterialIcons name="check" size={16} color="#fff" />
+                  )}
+                </View>
+                <Text
+                  style={[
+                    styles.habitName,
+                    {
+                      color: item.completed ? c.textMuted : c.text,
+                      textDecorationLine: item.completed
+                        ? "line-through"
+                        : "none",
+                    },
+                  ]}
+                >
+                  {item.name}
+                </Text>
+              </View>
             </TouchableOpacity>
           )}
         />
@@ -54,22 +79,40 @@ export default function HabitTrackerScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
-  emptyContainer: { flex: 1, alignItems: "center", justifyContent: "center" },
-  emptyText: {
-    textAlign: "center",
-    marginTop: 12,
-    color: "#999",
-    fontSize: 16,
+  container: { flex: 1, paddingHorizontal: 20, paddingTop: 8 },
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingBottom: 80,
+    backgroundColor: "transparent",
   },
+  emptyIconWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  emptyTitle: { fontSize: 20, fontWeight: "700", marginBottom: 6 },
+  emptyText: { textAlign: "center", fontSize: 15 },
   habitItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 14,
-    paddingHorizontal: 8,
+    paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
   },
-  habitName: { fontSize: 16, color: "#212121" },
+  habitLeft: { flexDirection: "row", alignItems: "center", flex: 1 },
+  checkWrap: {
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+  },
+  habitName: { fontSize: 16, fontWeight: "500" },
 });

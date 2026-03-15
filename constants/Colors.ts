@@ -27,7 +27,7 @@ export default {
     text: '#F9FAFB',
     textSecondary: '#9CA3AF',
     textMuted: '#6B7280',
-    background: '#0F0F1A',
+    background: '#000000',
     surface: '#1A1A2E',
     surfaceAlt: '#232340',
     border: '#2D2D4A',
