@@ -63,6 +63,12 @@ function RootLayoutNav() {
       <HabitsProvider>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="goal-details" options={{ title: "Goal Details" }} />
+          <Stack.Screen name="start-session" options={{ title: "Session" }} />
+          <Stack.Screen name="session-history" options={{ title: "Session History" }} />
+          <Stack.Screen name="habit-tracker" options={{ title: "Habit Tracker" }} />
+          <Stack.Screen name="create-goal" options={{ title: "Create Goal", presentation: "modal" }} />
+          <Stack.Screen name="edit-goal" options={{ title: "Edit Goal", presentation: "modal" }} />
           <Stack.Screen name="modal" options={{ presentation: "modal" }} />
         </Stack>
       </HabitsProvider>

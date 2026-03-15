@@ -72,7 +72,10 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={styles.goalCard}
               onPress={() =>
-                router.push({ pathname: "/goal-details", params: { id: item.id } })
+                router.push({
+                  pathname: "/goal-details",
+                  params: { id: item.id },
+                })
               }
             >
               <View style={styles.goalHeader}>
@@ -87,7 +90,10 @@ export default function HomeScreen() {
               </View>
               <View style={styles.progressBarBg}>
                 <View
-                  style={[styles.progressBarFill, { width: `${item.percentage}%` }]}
+                  style={[
+                    styles.progressBarFill,
+                    { width: `${item.percentage}%` },
+                  ]}
                 />
               </View>
               <Text style={styles.percentText}>{item.percentage}%</Text>

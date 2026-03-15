@@ -4,11 +4,13 @@ import { Alert, FlatList, StyleSheet, TextInput, TouchableOpacity } from "react-
 import { Text, View } from "@/components/Themed";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useHabits } from "@/context/habits-context";
+import { useRouter } from "expo-router";
 import { Habit } from "@/db";
 
 export default function SettingsScreen() {
   const { habitsList, addHabit, removeHabit } = useHabits();
   const [newHabit, setNewHabit] = useState("");
+  const router = useRouter();
 
   const onAddHabit = () => {
     const habit = newHabit.trim();
@@ -27,6 +29,16 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.navItem}
+        onPress={() => router.push("/habit-tracker")}
+      >
+        <MaterialIcons name="check-circle" size={24} color="#4CAF50" />
+        <Text style={styles.navText}>Habit Tracker</Text>
+        <MaterialIcons name="chevron-right" size={24} color="#999" />
+      </TouchableOpacity>
+
+      <Text style={styles.sectionTitle}>Manage Habits</Text>
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -62,6 +74,27 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: "#fff",
+  },
+  navItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
+    marginBottom: 8,
+  },
+  navText: {
+    flex: 1,
+    fontSize: 16,
+    color: "#212121",
+    marginLeft: 12,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#212121",
+    marginTop: 16,
+    marginBottom: 10,
   },
   inputContainer: {
     flexDirection: "row",

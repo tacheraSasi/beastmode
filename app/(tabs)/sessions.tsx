@@ -69,7 +69,11 @@ export default function SessionsScreen() {
 
               {item.activeSession ? (
                 <View style={styles.activeSession}>
-                  <MaterialIcons name="fiber-manual-record" size={12} color="#F44336" />
+                  <MaterialIcons
+                    name="fiber-manual-record"
+                    size={12}
+                    color="#F44336"
+                  />
                   <Text style={styles.activeText}>Session in progress</Text>
                   <TouchableOpacity
                     style={styles.resumeBtn}
