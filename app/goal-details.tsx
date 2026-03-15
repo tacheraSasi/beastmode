@@ -8,7 +8,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
+import { useLocalSearchParams, useRouter, useFocusEffect, type Href } from "expo-router";
 import {
   getGoalById,
   getGoalProgress,
@@ -89,9 +89,7 @@ export default function GoalDetailsScreen() {
           {progress.totalHours.toFixed(1)} / {goal.goalHours ?? 100} hours
         </Text>
         <View style={styles.progressBarBg}>
-          <View
-            style={[styles.progressBarFill, { width: `${percentage}%` }]}
-          />
+          <View style={[styles.progressBarFill, { width: `${percentage}%` }]} />
         </View>
         <Text style={styles.percentText}>{percentage}% complete</Text>
       </View>
@@ -104,7 +102,7 @@ export default function GoalDetailsScreen() {
               router.push({
                 pathname: "/start-session",
                 params: { goalId: goal.id },
-              })
+              } as Href)
             }
           >
             <MaterialIcons name="fiber-manual-record" size={18} color="#fff" />
@@ -117,7 +115,7 @@ export default function GoalDetailsScreen() {
               router.push({
                 pathname: "/start-session",
                 params: { goalId: goal.id },
-              })
+              } as Href)
             }
           >
             <MaterialIcons name="play-arrow" size={18} color="#fff" />
@@ -132,7 +130,7 @@ export default function GoalDetailsScreen() {
               router.push({
                 pathname: "/edit-goal",
                 params: { id: goal.id },
-              })
+              } as Href)
             }
           >
             <MaterialIcons name="edit" size={18} color="#2196F3" />
@@ -144,7 +142,7 @@ export default function GoalDetailsScreen() {
               router.push({
                 pathname: "/session-history",
                 params: { goalId: goal.id },
-              })
+              } as Href)
             }
           >
             <MaterialIcons name="history" size={18} color="#2196F3" />
@@ -197,7 +195,12 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   progressBarFill: { height: 10, backgroundColor: "#4CAF50", borderRadius: 5 },
-  percentText: { fontSize: 14, color: "#4CAF50", marginTop: 6, fontWeight: "600" },
+  percentText: {
+    fontSize: 14,
+    color: "#4CAF50",
+    marginTop: 6,
+    fontWeight: "600",
+  },
   actions: { marginBottom: 24 },
   actionBtn: {
     flexDirection: "row",
@@ -207,7 +210,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 10,
   },
-  actionBtnText: { color: "#fff", fontWeight: "bold", fontSize: 16, marginLeft: 6 },
+  actionBtnText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+    marginLeft: 6,
+  },
   row: { flexDirection: "row" },
   secondaryBtn: {
     flexDirection: "row",
@@ -220,7 +228,12 @@ const styles = StyleSheet.create({
   },
   secondaryBtnText: { color: "#2196F3", fontWeight: "600", marginLeft: 4 },
   section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 18, fontWeight: "bold", color: "#212121", marginBottom: 10 },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#212121",
+    marginBottom: 10,
+  },
   sessionRow: {
     flexDirection: "row",
     justifyContent: "space-between",

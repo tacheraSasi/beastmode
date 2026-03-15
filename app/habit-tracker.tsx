@@ -1,11 +1,22 @@
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useHabits } from "@/context/habits-context";
 import { DateSelector } from "@/components/DateSelector";
 
 export default function HabitTrackerScreen() {
-  const { habitsList, dailyHabits, selectedDate, setSelectedDate, toggleHabit } =
-    useHabits();
+  const {
+    habitsList,
+    dailyHabits,
+    selectedDate,
+    setSelectedDate,
+    toggleHabit,
+  } = useHabits();
 
   return (
     <View style={styles.container}>
@@ -28,7 +39,9 @@ export default function HabitTrackerScreen() {
             >
               <Text style={styles.habitName}>{item.name}</Text>
               <MaterialIcons
-                name={item.completed ? "check-circle" : "radio-button-unchecked"}
+                name={
+                  item.completed ? "check-circle" : "radio-button-unchecked"
+                }
                 size={24}
                 color={item.completed ? "#4CAF50" : "#757575"}
               />

@@ -1,5 +1,9 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
@@ -63,12 +67,27 @@ function RootLayoutNav() {
       <HabitsProvider>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="goal-details" options={{ title: "Goal Details" }} />
+          <Stack.Screen
+            name="goal-details"
+            options={{ title: "Goal Details" }}
+          />
           <Stack.Screen name="start-session" options={{ title: "Session" }} />
-          <Stack.Screen name="session-history" options={{ title: "Session History" }} />
-          <Stack.Screen name="habit-tracker" options={{ title: "Habit Tracker" }} />
-          <Stack.Screen name="create-goal" options={{ title: "Create Goal", presentation: "modal" }} />
-          <Stack.Screen name="edit-goal" options={{ title: "Edit Goal", presentation: "modal" }} />
+          <Stack.Screen
+            name="session-history"
+            options={{ title: "Session History" }}
+          />
+          <Stack.Screen
+            name="habit-tracker"
+            options={{ title: "Habit Tracker" }}
+          />
+          <Stack.Screen
+            name="create-goal"
+            options={{ title: "Create Goal", presentation: "modal" }}
+          />
+          <Stack.Screen
+            name="edit-goal"
+            options={{ title: "Edit Goal", presentation: "modal" }}
+          />
           <Stack.Screen name="modal" options={{ presentation: "modal" }} />
         </Stack>
       </HabitsProvider>

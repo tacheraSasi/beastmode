@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useRouter, useFocusEffect } from "expo-router";
+import { useRouter, useFocusEffect, type Href } from "expo-router";
 import { getAllGoals, getGoalProgress } from "@/db";
 import type { Goal } from "@/db";
 
@@ -47,7 +47,7 @@ export default function HomeScreen() {
         <Text style={styles.title}>Your Goals</Text>
         <TouchableOpacity
           style={styles.addBtn}
-          onPress={() => router.push("/create-goal")}
+          onPress={() => router.push("/create-goal" as Href)}
         >
           <MaterialIcons name="add" size={24} color="#fff" />
         </TouchableOpacity>
@@ -59,7 +59,7 @@ export default function HomeScreen() {
           <Text style={styles.emptyText}>No goals yet.</Text>
           <TouchableOpacity
             style={styles.createBtn}
-            onPress={() => router.push("/create-goal")}
+            onPress={() => router.push("/create-goal" as Href)}
           >
             <Text style={styles.createBtnText}>Create Your First Goal</Text>
           </TouchableOpacity>

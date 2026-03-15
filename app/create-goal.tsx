@@ -10,7 +10,18 @@ import {
 import { useRouter } from "expo-router";
 import { createGoal } from "@/db";
 
-const ICON_OPTIONS = ["🎯", "💪", "📚", "🎵", "💻", "🎨", "🏃", "🧘", "✍️", "🔬"];
+const ICON_OPTIONS = [
+  "🎯",
+  "💪",
+  "📚",
+  "🎵",
+  "💻",
+  "🎨",
+  "🏃",
+  "🧘",
+  "✍️",
+  "🔬",
+];
 
 export default function CreateGoalScreen() {
   const router = useRouter();

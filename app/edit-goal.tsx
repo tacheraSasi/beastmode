@@ -10,7 +10,18 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { getGoalById, updateGoal } from "@/db";
 
-const ICON_OPTIONS = ["🎯", "💪", "📚", "🎵", "💻", "🎨", "🏃", "🧘", "✍️", "🔬"];
+const ICON_OPTIONS = [
+  "🎯",
+  "💪",
+  "📚",
+  "🎵",
+  "💻",
+  "🎨",
+  "🏃",
+  "🧘",
+  "✍️",
+  "🔬",
+];
 
 export default function EditGoalScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

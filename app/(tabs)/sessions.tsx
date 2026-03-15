@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useRouter, useFocusEffect } from "expo-router";
+import { useRouter, useFocusEffect, type Href } from "expo-router";
 import { getAllGoals, getActiveSession, getSessionsByGoal } from "@/db";
 import type { Goal, Session } from "@/db";
 
@@ -120,7 +120,7 @@ export default function SessionsScreen() {
                       router.push({
                         pathname: "/session-history",
                         params: { goalId: item.id },
-                      })
+                    } as Href)
                     }
                   >
                     <Text style={styles.viewAllText}>View All</Text>

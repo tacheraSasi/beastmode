@@ -6,7 +6,10 @@ import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
 
-function TabBarIcon(props: { name: React.ComponentProps<typeof FontAwesome>["name"]; color: string }) {
+function TabBarIcon(props: {
+  name: React.ComponentProps<typeof FontAwesome>["name"];
+  color: string;
+}) {
   return <FontAwesome size={24} style={{ marginBottom: -3 }} {...props} />;
 }
 
@@ -17,7 +20,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-        headerShown: useClientOnlyValue(false, true),
+        headerShown: false,
       }}
     >
       <Tabs.Screen
@@ -31,14 +34,18 @@ export default function TabLayout() {
         name="sessions"
         options={{
           title: "Sessions",
-          tabBarIcon: ({ color }) => <TabBarIcon name="play-circle" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="play-circle" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="stats"
         options={{
           title: "Stats",
-          tabBarIcon: ({ color }) => <TabBarIcon name="bar-chart" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="bar-chart" color={color} />
+          ),
         }}
       />
       <Tabs.Screen

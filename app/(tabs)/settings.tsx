@@ -1,10 +1,16 @@
 import { useState } from "react";
-import { Alert, FlatList, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import {
+  Alert,
+  FlatList,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 
 import { Text, View } from "@/components/Themed";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useHabits } from "@/context/habits-context";
-import { useRouter } from "expo-router";
+import { useRouter, type Href } from "expo-router";
 import { Habit } from "@/db";
 
 export default function SettingsScreen() {
@@ -21,17 +27,25 @@ export default function SettingsScreen() {
   };
 
   const onRemoveHabit = (habit: Habit) => {
-    Alert.alert("Remove Habit", `Are you sure you want to remove "${habit.name}"?`, [
-      { text: "Cancel", style: "cancel" },
-      { text: "Remove", onPress: () => removeHabit(habit.id), style: "destructive" },
-    ]);
+    Alert.alert(
+      "Remove Habit",
+      `Are you sure you want to remove "${habit.name}"?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove",
+          onPress: () => removeHabit(habit.id),
+          style: "destructive",
+        },
+      ],
+    );
   };
 
   return (
     <View style={styles.container}>
       <TouchableOpacity
         style={styles.navItem}
-        onPress={() => router.push("/habit-tracker")}
+        onPress={() => router.push("/habit-tracker" as Href)}
       >
         <MaterialIcons name="check-circle" size={24} color="#4CAF50" />
         <Text style={styles.navText}>Habit Tracker</Text>
@@ -48,7 +62,11 @@ export default function SettingsScreen() {
           returnKeyType="done"
           onSubmitEditing={onAddHabit}
         />
-        <TouchableOpacity style={styles.addButton} onPress={onAddHabit} disabled={!newHabit.trim()}>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={onAddHabit}
+          disabled={!newHabit.trim()}
+        >
           <Text style={styles.addButtonText}>Add</Text>
         </TouchableOpacity>
       </View>

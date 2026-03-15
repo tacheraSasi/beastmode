@@ -92,7 +92,11 @@ export default function SessionHistoryScreen() {
                   {formatDuration(item.durationSeconds)}
                 </Text>
                 <TouchableOpacity onPress={() => handleDelete(item)}>
-                  <MaterialIcons name="delete-outline" size={20} color="#F44336" />
+                  <MaterialIcons
+                    name="delete-outline"
+                    size={20}
+                    color="#F44336"
+                  />
                 </TouchableOpacity>
               </View>
             </View>

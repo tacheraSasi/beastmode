@@ -8,12 +8,7 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
-import {
-  getGoalById,
-  getActiveSession,
-  startSession,
-  endSession,
-} from "@/db";
+import { getGoalById, getActiveSession, startSession, endSession } from "@/db";
 import type { Goal, Session } from "@/db";
 
 export default function StartSessionScreen() {
@@ -136,9 +131,19 @@ const styles = StyleSheet.create({
   loadingText: { textAlign: "center", marginTop: 40, color: "#999" },
   goalInfo: { alignItems: "center", marginTop: 20 },
   icon: { fontSize: 48 },
-  goalName: { fontSize: 22, fontWeight: "bold", color: "#212121", marginTop: 8 },
+  goalName: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#212121",
+    marginTop: 8,
+  },
   timerContainer: { alignItems: "center", marginTop: 40 },
-  timerText: { fontSize: 64, fontWeight: "200", color: "#212121", fontVariant: ["tabular-nums"] },
+  timerText: {
+    fontSize: 64,
+    fontWeight: "200",
+    color: "#212121",
+    fontVariant: ["tabular-nums"],
+  },
   startedAt: { fontSize: 14, color: "#999", marginTop: 8 },
   notesInput: {
     borderWidth: 1,

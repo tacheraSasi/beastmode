@@ -39,9 +39,7 @@ export default function StatsScreen() {
               totalHours: progress.totalHours,
               percentage: Math.min(
                 100,
-                Math.round(
-                  (progress.totalHours / (g.goalHours ?? 100)) * 100,
-                ),
+                Math.round((progress.totalHours / (g.goalHours ?? 100)) * 100),
               ),
               last7DaysSeconds: weekSeconds,
             };
@@ -87,10 +85,7 @@ export default function StatsScreen() {
 
             <View style={styles.progressBarBg}>
               <View
-                style={[
-                  styles.progressBarFill,
-                  { width: `${g.percentage}%` },
-                ]}
+                style={[styles.progressBarFill, { width: `${g.percentage}%` }]}
               />
             </View>
 
