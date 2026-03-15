@@ -1,14 +1,10 @@
 import { useCallback, useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter, useFocusEffect, type Href } from "expo-router";
 import { getAllGoals, getActiveSession, getSessionsByGoal } from "@/db";
+import { View, Text, useColors } from "@/components/Themed";
+import Colors from "@/constants/Colors";
 import type { Goal, Session } from "@/db";
 
 type GoalWithSession = Goal & {
@@ -19,6 +15,7 @@ type GoalWithSession = Goal & {
 export default function SessionsScreen() {
   const router = useRouter();
   const [goals, setGoals] = useState<GoalWithSession[]>([]);
+  const c = useColors();
 
   useFocusEffect(
     useCallback(() => {
@@ -49,53 +46,84 @@ export default function SessionsScreen() {
 
   return (
     <View style={styles.container}>
+      <Text style={[styles.title, { color: c.text }]}>Sessions</Text>
+
       {goals.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <MaterialIcons name="timer" size={64} color="#ccc" />
-          <Text style={styles.emptyText}>
-            Create a goal first to start sessions.
+          <View
+            style={[styles.emptyIconWrap, { backgroundColor: c.surfaceAlt }]}
+          >
+            <MaterialIcons name="timer" size={40} color={c.textMuted} />
+          </View>
+          <Text style={[styles.emptyTitle, { color: c.text }]}>
+            No goals yet
+          </Text>
+          <Text style={[styles.emptyText, { color: c.textSecondary }]}>
+            Create a goal first to start tracking sessions
           </Text>
         </View>
       ) : (
         <FlatList
           data={goals}
           keyExtractor={(item) => item.id.toString()}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 20 }}
           renderItem={({ item }) => (
-            <View style={styles.goalCard}>
-              <View style={styles.goalHeader}>
-                <Text style={styles.goalIcon}>{item.icon ?? "🎯"}</Text>
-                <Text style={styles.goalName}>{item.name}</Text>
+            <View
+              style={[
+                styles.goalCard,
+                { backgroundColor: c.card, borderColor: c.border },
+              ]}
+            >
+              <View
+                style={[styles.goalHeader, { backgroundColor: "transparent" }]}
+              >
+                <View
+                  style={[styles.iconWrap, { backgroundColor: c.surfaceAlt }]}
+                >
+                  <Text style={styles.goalIcon}>{item.icon ?? "🎯"}</Text>
+                </View>
+                <Text style={[styles.goalName, { color: c.text }]}>
+                  {item.name}
+                </Text>
               </View>
 
               {item.activeSession ? (
-                <View style={styles.activeSession}>
-                  <MaterialIcons
-                    name="fiber-manual-record"
-                    size={12}
-                    color="#F44336"
-                  />
-                  <Text style={styles.activeText}>Session in progress</Text>
-                  <TouchableOpacity
-                    style={styles.resumeBtn}
-                    onPress={() =>
-                      router.push({
-                        pathname: "/start-session",
-                        params: { goalId: item.id },
-                      })
-                    }
-                  >
-                    <Text style={styles.resumeBtnText}>Resume</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
                 <TouchableOpacity
-                  style={styles.startBtn}
+                  style={[
+                    styles.activeSession,
+                    { backgroundColor: c.dangerLight },
+                  ]}
                   onPress={() =>
                     router.push({
                       pathname: "/start-session",
                       params: { goalId: item.id },
-                    })
+                    } as Href)
                   }
+                  activeOpacity={0.7}
+                >
+                  <View
+                    style={[styles.liveDot, { backgroundColor: c.danger }]}
+                  />
+                  <Text style={[styles.activeText, { color: c.danger }]}>
+                    Session in progress
+                  </Text>
+                  <View
+                    style={[styles.resumeChip, { backgroundColor: c.danger }]}
+                  >
+                    <Text style={styles.resumeChipText}>Resume</Text>
+                  </View>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={[styles.startBtn, { backgroundColor: Colors.accent }]}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/start-session",
+                      params: { goalId: item.id },
+                    } as Href)
+                  }
+                  activeOpacity={0.8}
                 >
                   <MaterialIcons name="play-arrow" size={20} color="#fff" />
                   <Text style={styles.startBtnText}>Start Session</Text>
@@ -103,14 +131,32 @@ export default function SessionsScreen() {
               )}
 
               {item.recentSessions.length > 0 && (
-                <View style={styles.recentSection}>
-                  <Text style={styles.recentLabel}>Recent</Text>
+                <View
+                  style={[
+                    styles.recentSection,
+                    { backgroundColor: "transparent" },
+                  ]}
+                >
+                  <Text style={[styles.recentLabel, { color: c.textMuted }]}>
+                    RECENT
+                  </Text>
                   {item.recentSessions.map((s) => (
-                    <View key={s.id} style={styles.sessionRow}>
-                      <Text style={styles.sessionDate}>
+                    <View
+                      key={s.id}
+                      style={[
+                        styles.sessionRow,
+                        {
+                          backgroundColor: "transparent",
+                          borderBottomColor: c.border,
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[styles.sessionDate, { color: c.textSecondary }]}
+                      >
                         {s.startTime.toLocaleDateString()}
                       </Text>
-                      <Text style={styles.sessionDuration}>
+                      <Text style={[styles.sessionDuration, { color: c.text }]}>
                         {formatDuration(s.durationSeconds)}
                       </Text>
                     </View>
@@ -122,8 +168,13 @@ export default function SessionsScreen() {
                         params: { goalId: item.id },
                       } as Href)
                     }
+                    activeOpacity={0.7}
                   >
-                    <Text style={styles.viewAllText}>View All</Text>
+                    <Text
+                      style={[styles.viewAllText, { color: Colors.accent }]}
+                    >
+                      View All History →
+                    </Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -136,66 +187,109 @@ export default function SessionsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 16 },
-  emptyContainer: { flex: 1, alignItems: "center", justifyContent: "center" },
-  emptyText: { fontSize: 16, color: "#999", marginTop: 12 },
+  container: { flex: 1, paddingHorizontal: 20, paddingTop: 16 },
+  title: {
+    fontSize: 28,
+    fontWeight: "800",
+    letterSpacing: -0.5,
+    marginBottom: 20,
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingBottom: 80,
+    backgroundColor: "transparent",
+  },
+  emptyIconWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  emptyTitle: { fontSize: 20, fontWeight: "700", marginBottom: 6 },
+  emptyText: { fontSize: 15, textAlign: "center" },
   goalCard: {
-    backgroundColor: "#F5F5F5",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     marginBottom: 12,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
   goalHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 14,
   },
-  goalIcon: { fontSize: 24, marginRight: 8 },
-  goalName: { fontSize: 18, fontWeight: "600", color: "#212121" },
+  iconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  goalIcon: { fontSize: 20 },
+  goalName: { fontSize: 17, fontWeight: "700", flex: 1 },
   activeSession: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF3F0",
-    padding: 10,
-    borderRadius: 8,
+    padding: 12,
+    borderRadius: 12,
     marginBottom: 8,
+    backgroundColor: "transparent",
   },
-  activeText: { flex: 1, marginLeft: 6, color: "#F44336", fontWeight: "500" },
-  resumeBtn: {
-    backgroundColor: "#F44336",
+  liveDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  activeText: { flex: 1, fontWeight: "600", fontSize: 14 },
+  resumeChip: {
     paddingHorizontal: 14,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: 8,
   },
-  resumeBtnText: { color: "#fff", fontWeight: "600" },
+  resumeChipText: { color: "#fff", fontWeight: "700", fontSize: 13 },
   startBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#4CAF50",
-    paddingVertical: 10,
-    borderRadius: 8,
-    marginBottom: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginBottom: 4,
   },
-  startBtnText: { color: "#fff", fontWeight: "600", marginLeft: 4 },
-  recentSection: { marginTop: 8 },
+  startBtnText: {
+    color: "#fff",
+    fontWeight: "700",
+    marginLeft: 4,
+    fontSize: 15,
+  },
+  recentSection: { marginTop: 10 },
   recentLabel: {
-    fontSize: 13,
-    color: "#999",
-    fontWeight: "600",
-    marginBottom: 6,
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 1,
+    marginBottom: 8,
   },
   sessionRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 4,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
   },
-  sessionDate: { color: "#555", fontSize: 14 },
-  sessionDuration: { color: "#212121", fontSize: 14, fontWeight: "500" },
+  sessionDate: { fontSize: 14 },
+  sessionDuration: { fontSize: 14, fontWeight: "600" },
   viewAllText: {
-    color: "#2196F3",
     fontSize: 14,
-    fontWeight: "500",
-    marginTop: 6,
+    fontWeight: "600",
+    marginTop: 10,
   },
 });
