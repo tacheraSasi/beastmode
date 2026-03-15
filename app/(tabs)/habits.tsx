@@ -1,23 +1,27 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   Alert,
   FlatList,
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  ScrollView,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useHabits } from "@/context/habits-context";
+import { useFocusEffect } from "expo-router";
 import { DateSelector } from "@/components/DateSelector";
 import { View, Text, useColors } from "@/components/Themed";
+import { MiniBarChart } from "@/components/Charts";
 import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
-import { Habit } from "@/db";
+import { Habit, getHabitCompletionHistory } from "@/db";
 
 export default function HabitsTab() {
   const {
     habitsList,
     dailyHabits,
+    streaks,
     selectedDate,
     setSelectedDate,
     toggleHabit,
@@ -27,6 +31,27 @@ export default function HabitsTab() {
   const c = useColors();
   const [managing, setManaging] = useState(false);
   const [newHabit, setNewHabit] = useState("");
+  const [chartData, setChartData] = useState<number[]>([]);
+  const [chartLabels, setChartLabels] = useState<string[]>([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      (async () => {
+        const history = await getHabitCompletionHistory(7);
+        setChartData(history.map((d) => d.completed));
+        setChartLabels(
+          history.map((d) => {
+            const dt = new Date(d.date + "T00:00:00");
+            return dt
+              .toLocaleDateString("en", { weekday: "short" })
+              .slice(0, 3);
+          }),
+        );
+      })();
+    }, [dailyHabits]),
+  );
+
+  const longestStreak = Math.max(0, ...Object.values(streaks));
 
   const completedCount = dailyHabits.filter((h) => h.completed).length;
   const progressPct =
@@ -220,6 +245,34 @@ export default function HabitsTab() {
                 ]}
               />
             </View>
+            {/* Streak row */}
+            <View
+              style={[styles.streakRow, { backgroundColor: "transparent" }]}
+            >
+              <MaterialIcons
+                name="local-fire-department"
+                size={16}
+                color={Colors.accent}
+              />
+              <Text style={[styles.streakRowText, { color: c.textSecondary }]}>
+                Best streak: {longestStreak} day{longestStreak !== 1 ? "s" : ""}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* Weekly completion chart */}
+        {chartData.length > 0 && habitsList.length > 0 && (
+          <View
+            style={[
+              styles.chartCard,
+              { backgroundColor: c.card, borderColor: c.border },
+            ]}
+          >
+            <Text style={[styles.chartTitle, { color: c.text }]}>
+              This Week
+            </Text>
+            <MiniBarChart data={chartData} labels={chartLabels} height={160} />
           </View>
         )}
 
@@ -284,14 +337,42 @@ export default function HabitsTab() {
                 >
                   {item.name}
                 </Text>
-                {item.completed && (
-                  <MaterialIcons
-                    name="check-circle"
-                    size={20}
-                    color={c.success}
-                    style={{ marginLeft: "auto" }}
-                  />
-                )}
+                <View
+                  style={[
+                    styles.habitRight,
+                    { backgroundColor: "transparent" },
+                  ]}
+                >
+                  {(streaks[item.id] ?? 0) > 0 && (
+                    <View
+                      style={[
+                        styles.streakBadge,
+                        { backgroundColor: Colors.accentLight },
+                      ]}
+                    >
+                      <MaterialIcons
+                        name="local-fire-department"
+                        size={12}
+                        color={Colors.accent}
+                      />
+                      <Text
+                        style={[
+                          styles.streakBadgeText,
+                          { color: Colors.accent },
+                        ]}
+                      >
+                        {streaks[item.id]}
+                      </Text>
+                    </View>
+                  )}
+                  {item.completed && (
+                    <MaterialIcons
+                      name="check-circle"
+                      size={20}
+                      color={c.success}
+                    />
+                  )}
+                </View>
               </TouchableOpacity>
             )}
           />
@@ -418,5 +499,34 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 14,
   },
-  habitName: { fontSize: 16, fontWeight: "500" },
+  habitName: { fontSize: 16, fontWeight: "500", flex: 1 },
+  habitRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginLeft: "auto",
+  },
+  streakBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    gap: 2,
+  },
+  streakBadgeText: { fontSize: 12, fontWeight: "700" },
+  streakRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+    gap: 4,
+  },
+  streakRowText: { fontSize: 13, fontWeight: "600" },
+  chartCard: {
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+  },
+  chartTitle: { fontSize: 16, fontWeight: "700", marginBottom: 8 },
 });

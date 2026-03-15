@@ -231,3 +231,80 @@ export async function getStatsForDateRange(
 export async function getAllStatsForDate(date: Date) {
   return db.select().from(dailyStats).where(eq(dailyStats.date, date));
 }
+
+// ─── Streaks ─────────────────────────────────────────────
+
+/** Get current streak for a single habit (consecutive days ending at today) */
+export async function getHabitStreak(habitId: number): Promise<number> {
+  const today = new Date();
+  let streak = 0;
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split("T")[0];
+    const row = await db
+      .select()
+      .from(logs)
+      .where(and(eq(logs.habit_id, habitId), eq(logs.date, dateStr)));
+    if (row.length > 0) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+/** Get streaks for all habits at once */
+export async function getAllHabitStreaks(): Promise<Record<number, number>> {
+  const allHabits = await db.select().from(habits);
+  const streaks: Record<number, number> = {};
+  for (const h of allHabits) {
+    streaks[h.id] = await getHabitStreak(h.id);
+  }
+  return streaks;
+}
+
+/** Get completion counts per day for the last N days (for charts) */
+export async function getHabitCompletionHistory(days: number = 7): Promise<{ date: string; completed: number; total: number }[]> {
+  const allHabits = await db.select().from(habits);
+  const total = allHabits.length;
+  const result: { date: string; completed: number; total: number }[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split("T")[0];
+    const dayLogs = await db.select().from(logs).where(eq(logs.date, dateStr));
+    result.push({ date: dateStr, completed: dayLogs.length, total });
+  }
+  return result;
+}
+
+/** Get session hours per day for a goal over the last N days (for charts) */
+export async function getGoalSessionHistory(goalId: number, days: number = 7): Promise<{ date: string; hours: number }[]> {
+  const result: { date: string; hours: number }[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    d.setHours(0, 0, 0, 0);
+    const stat = await getDailyStatsForGoal(goalId, d);
+    const dateStr = d.toISOString().split("T")[0];
+    result.push({ date: dateStr, hours: stat ? stat.durationSeconds / 3600 : 0 });
+  }
+  return result;
+}
+
+/** Get total session hours per day across all goals over the last N days */
+export async function getTotalSessionHistory(days: number = 7): Promise<{ date: string; hours: number }[]> {
+  const result: { date: string; hours: number }[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    d.setHours(0, 0, 0, 0);
+    const stats = await getAllStatsForDate(d);
+    const totalSec = stats.reduce((sum, s) => sum + s.durationSeconds, 0);
+    const dateStr = d.toISOString().split("T")[0];
+    result.push({ date: dateStr, hours: totalSec / 3600 });
+  }
+  return result;
+}

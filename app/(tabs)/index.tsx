@@ -2,8 +2,14 @@ import { useCallback, useState } from "react";
 import { ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter, useFocusEffect, type Href } from "expo-router";
-import { getAllGoals, getGoalProgress, getStatsForDateRange } from "@/db";
+import {
+  getAllGoals,
+  getGoalProgress,
+  getStatsForDateRange,
+  getTotalSessionHistory,
+} from "@/db";
 import { View, Text, useColors } from "@/components/Themed";
+import { MiniLineChart } from "@/components/Charts";
 import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
 import { useHabits } from "@/context/habits-context";
@@ -19,8 +25,12 @@ export default function HomeScreen() {
   const router = useRouter();
   const [goals, setGoals] = useState<GoalWithProgress[]>([]);
   const [totalHoursAll, setTotalHoursAll] = useState(0);
-  const { dailyHabits, toggleHabit } = useHabits();
+  const [sessionChartData, setSessionChartData] = useState<number[]>([]);
+  const [sessionChartLabels, setSessionChartLabels] = useState<string[]>([]);
+  const { dailyHabits, streaks, toggleHabit } = useHabits();
   const c = useColors();
+
+  const bestStreak = Math.max(0, ...Object.values(streaks));
 
   const loadGoals = useCallback(async () => {
     const allGoals = await getAllGoals();
@@ -57,6 +67,19 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       loadGoals();
+      // Load session chart data
+      (async () => {
+        const history = await getTotalSessionHistory(7);
+        setSessionChartData(history.map((d) => Math.round(d.hours * 10) / 10));
+        setSessionChartLabels(
+          history.map((d) => {
+            const dt = new Date(d.date + "T00:00:00");
+            return dt
+              .toLocaleDateString("en", { weekday: "short" })
+              .slice(0, 3);
+          }),
+        );
+      })();
     }, [loadGoals]),
   );
 
@@ -98,12 +121,12 @@ export default function HomeScreen() {
               <View style={styles.heroIconWrap}>
                 <MaterialIcons
                   name="local-fire-department"
-                  size={22}
+                  size={20}
                   color="#fff"
                 />
               </View>
-              <Text style={styles.heroValue}>{totalHoursAll.toFixed(1)}h</Text>
-              <Text style={styles.heroLabel}>Total Hours</Text>
+              <Text style={styles.heroValue}>{bestStreak}</Text>
+              <Text style={styles.heroLabel}>Streak</Text>
             </View>
             <View
               style={[
@@ -113,7 +136,20 @@ export default function HomeScreen() {
             />
             <View style={[styles.heroStat, { backgroundColor: "transparent" }]}>
               <View style={styles.heroIconWrap}>
-                <MaterialIcons name="flag" size={22} color="#fff" />
+                <MaterialIcons name="timer" size={20} color="#fff" />
+              </View>
+              <Text style={styles.heroValue}>{totalHoursAll.toFixed(1)}h</Text>
+              <Text style={styles.heroLabel}>Hours</Text>
+            </View>
+            <View
+              style={[
+                styles.heroDivider,
+                { backgroundColor: "rgba(255,255,255,0.2)" },
+              ]}
+            />
+            <View style={[styles.heroStat, { backgroundColor: "transparent" }]}>
+              <View style={styles.heroIconWrap}>
+                <MaterialIcons name="flag" size={20} color="#fff" />
               </View>
               <Text style={styles.heroValue}>{goals.length}</Text>
               <Text style={styles.heroLabel}>Goals</Text>
@@ -126,12 +162,12 @@ export default function HomeScreen() {
             />
             <View style={[styles.heroStat, { backgroundColor: "transparent" }]}>
               <View style={styles.heroIconWrap}>
-                <MaterialIcons name="check-circle" size={22} color="#fff" />
+                <MaterialIcons name="check-circle" size={20} color="#fff" />
               </View>
               <Text style={styles.heroValue}>
                 {completedHabits}/{dailyHabits.length}
               </Text>
-              <Text style={styles.heroLabel}>Habits Today</Text>
+              <Text style={styles.heroLabel}>Habits</Text>
             </View>
           </View>
         </View>
@@ -205,6 +241,26 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               ))}
             </View>
+          </View>
+        )}
+
+        {/* Session Hours Chart */}
+        {sessionChartData.some((v) => v > 0) && (
+          <View
+            style={[
+              styles.chartCard,
+              { backgroundColor: c.card, borderColor: c.border },
+            ]}
+          >
+            <Text style={[styles.chartTitle, { color: c.text }]}>
+              Session Hours (7 days)
+            </Text>
+            <MiniLineChart
+              data={sessionChartData}
+              labels={sessionChartLabels}
+              height={160}
+              suffix="h"
+            />
           </View>
         )}
 
@@ -518,4 +574,11 @@ const styles = StyleSheet.create({
   progressBarFill: { height: 6, borderRadius: 3 },
   weekRow: { flexDirection: "row", alignItems: "center" },
   weekText: { fontSize: 12, marginLeft: 5 },
+  chartCard: {
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+  },
+  chartTitle: { fontSize: 16, fontWeight: "700", marginBottom: 8 },
 });

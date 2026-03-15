@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { db } from "../db";
 import { habits, logs, Habit } from "@/db";
+import { getAllHabitStreaks } from "@/db";
 import { eq, and } from "drizzle-orm";
 
 type DailyLog = Habit & { completed: boolean };
@@ -8,6 +9,7 @@ type DailyLog = Habit & { completed: boolean };
 interface HabitsContextType {
   habitsList: Habit[];
   dailyHabits: DailyLog[];
+  streaks: Record<number, number>;
   selectedDate: Date;
   setSelectedDate: (date: Date) => void;
   addHabit: (name: string) => Promise<void>;
@@ -21,6 +23,7 @@ const HabitsContext = createContext<HabitsContextType | null>(null);
 export function HabitsProvider({ children }: { children: React.ReactNode }) {
   const [habitsList, setHabits] = useState<Habit[]>([]);
   const [dailyHabits, setDailyHabits] = useState<DailyLog[]>([]);
+  const [streaks, setStreaks] = useState<Record<number, number>>({});
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const loadHabits = async (date: Date) => {
@@ -31,7 +34,10 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
       const allHabits = await db.select().from(habits);
 
       // Get logs for selected date
-      const existingLogs = await db.select().from(logs).where(eq(logs.date, dateString));
+      const existingLogs = await db
+        .select()
+        .from(logs)
+        .where(eq(logs.date, dateString));
 
       const dateLogs: DailyLog[] = allHabits.map((habit) => ({
         ...habit,
@@ -40,6 +46,10 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
 
       setDailyHabits(dateLogs);
       setHabits(allHabits);
+
+      // Load streaks
+      const s = await getAllHabitStreaks();
+      setStreaks(s);
     } catch (error) {
       console.error("Error loading habits:", error);
     }
@@ -50,7 +60,10 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
       const dateString = date.toISOString().split("T")[0];
 
       // Get logs for selected date
-      const existingLogs = await db.select().from(logs).where(eq(logs.date, dateString));
+      const existingLogs = await db
+        .select()
+        .from(logs)
+        .where(eq(logs.date, dateString));
 
       const dateLogs: DailyLog[] = habitsList.map((habit) => ({
         ...habit,
@@ -96,7 +109,9 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
         .get();
 
       if (existingLog) {
-        await db.delete(logs).where(and(eq(logs.habit_id, id), eq(logs.date, dateString)));
+        await db
+          .delete(logs)
+          .where(and(eq(logs.habit_id, id), eq(logs.date, dateString)));
       } else {
         await db.insert(logs).values({
           habit_id: id,
@@ -105,6 +120,8 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
       }
 
       loadDailyHabits(selectedDate);
+      // Refresh streaks after toggle
+      getAllHabitStreaks().then(setStreaks);
     } catch (error) {
       console.error("Error toggling habit:", error);
     }
@@ -117,6 +134,7 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
       value={{
         habitsList,
         dailyHabits,
+        streaks,
         selectedDate,
         setSelectedDate,
         addHabit,
