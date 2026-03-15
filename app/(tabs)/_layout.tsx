@@ -55,11 +55,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="stats"
+        name="habits"
         options={{
-          title: "Stats",
+          title: "Habits",
           tabBarIcon: ({ color }) => (
-            <TabBarIcon name="bar-chart" color={color} />
+            <TabBarIcon name="check-circle" color={color} />
           ),
         }}
       />

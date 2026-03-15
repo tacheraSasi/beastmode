@@ -1,25 +1,44 @@
 import { useCallback, useState } from "react";
-import { FlatList, TouchableOpacity, StyleSheet } from "react-native";
+import { ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter, useFocusEffect, type Href } from "expo-router";
-import { getAllGoals, getGoalProgress } from "@/db";
+import { getAllGoals, getGoalProgress, getStatsForDateRange } from "@/db";
 import { View, Text, useColors } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
+import { useHabits } from "@/context/habits-context";
 import type { Goal } from "@/db";
 
-type GoalWithProgress = Goal & { totalHours: number; percentage: number };
+type GoalWithProgress = Goal & {
+  totalHours: number;
+  percentage: number;
+  last7DaysSeconds: number;
+};
 
 export default function HomeScreen() {
   const router = useRouter();
   const [goals, setGoals] = useState<GoalWithProgress[]>([]);
+  const [totalHoursAll, setTotalHoursAll] = useState(0);
+  const { dailyHabits, toggleHabit } = useHabits();
   const c = useColors();
 
   const loadGoals = useCallback(async () => {
     const allGoals = await getAllGoals();
+    const now = new Date();
+    const weekAgo = new Date();
+    weekAgo.setDate(now.getDate() - 7);
+    weekAgo.setHours(0, 0, 0, 0);
+
+    let total = 0;
     const withProgress = await Promise.all(
       allGoals.map(async (g) => {
         const progress = await getGoalProgress(g.id);
+        const weekStats = await getStatsForDateRange(g.id, weekAgo, now);
+        const weekSeconds = weekStats.reduce(
+          (sum, s) => sum + s.durationSeconds,
+          0,
+        );
+        total += progress.totalHours;
         return {
           ...g,
           totalHours: progress.totalHours,
@@ -27,10 +46,12 @@ export default function HomeScreen() {
             100,
             Math.round((progress.totalHours / (g.goalHours ?? 100)) * 100),
           ),
+          last7DaysSeconds: weekSeconds,
         };
       }),
     );
     setGoals(withProgress);
+    setTotalHoursAll(total);
   }, []);
 
   useFocusEffect(
@@ -39,13 +60,27 @@ export default function HomeScreen() {
     }, [loadGoals]),
   );
 
+  const formatDuration = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  };
+
+  const completedHabits = dailyHabits.filter((h) => h.completed).length;
+
   return (
     <ScreenLayout insideTabs>
-      <View style={styles.container}>
-        <View style={styles.header}>
+      <ScrollView
+        style={[styles.container, { backgroundColor: c.background }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={[styles.header, { backgroundColor: "transparent" }]}>
           <View style={{ backgroundColor: "transparent" }}>
-            <Text style={styles.greeting}>Welcome back</Text>
-            <Text style={[styles.title, { color: c.text }]}>Your Goals</Text>
+            <Text style={[styles.greeting, { color: c.textMuted }]}>
+              Welcome back
+            </Text>
+            <Text style={[styles.title, { color: c.text }]}>Dashboard</Text>
           </View>
           <TouchableOpacity
             style={[styles.addBtn, { backgroundColor: Colors.accent }]}
@@ -53,6 +88,138 @@ export default function HomeScreen() {
             activeOpacity={0.8}
           >
             <MaterialIcons name="add" size={22} color="#fff" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Stats Hero */}
+        <View style={[styles.heroCard, { backgroundColor: Colors.accent }]}>
+          <View style={[styles.heroRow, { backgroundColor: "transparent" }]}>
+            <View style={[styles.heroStat, { backgroundColor: "transparent" }]}>
+              <View style={styles.heroIconWrap}>
+                <MaterialIcons
+                  name="local-fire-department"
+                  size={22}
+                  color="#fff"
+                />
+              </View>
+              <Text style={styles.heroValue}>{totalHoursAll.toFixed(1)}h</Text>
+              <Text style={styles.heroLabel}>Total Hours</Text>
+            </View>
+            <View
+              style={[
+                styles.heroDivider,
+                { backgroundColor: "rgba(255,255,255,0.2)" },
+              ]}
+            />
+            <View style={[styles.heroStat, { backgroundColor: "transparent" }]}>
+              <View style={styles.heroIconWrap}>
+                <MaterialIcons name="flag" size={22} color="#fff" />
+              </View>
+              <Text style={styles.heroValue}>{goals.length}</Text>
+              <Text style={styles.heroLabel}>Goals</Text>
+            </View>
+            <View
+              style={[
+                styles.heroDivider,
+                { backgroundColor: "rgba(255,255,255,0.2)" },
+              ]}
+            />
+            <View style={[styles.heroStat, { backgroundColor: "transparent" }]}>
+              <View style={styles.heroIconWrap}>
+                <MaterialIcons name="check-circle" size={22} color="#fff" />
+              </View>
+              <Text style={styles.heroValue}>
+                {completedHabits}/{dailyHabits.length}
+              </Text>
+              <Text style={styles.heroLabel}>Habits Today</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Today's Habits */}
+        {dailyHabits.length > 0 && (
+          <View style={{ backgroundColor: "transparent" }}>
+            <View
+              style={[styles.sectionHeader, { backgroundColor: "transparent" }]}
+            >
+              <Text style={[styles.sectionTitle, { color: c.text }]}>
+                Today's Habits
+              </Text>
+              <TouchableOpacity
+                onPress={() => router.push("/habit-tracker" as Href)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.seeAll, { color: Colors.accent }]}>
+                  See All
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View
+              style={[
+                styles.habitsCard,
+                { backgroundColor: c.card, borderColor: c.border },
+              ]}
+            >
+              {dailyHabits.slice(0, 5).map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={[
+                    styles.habitRow,
+                    { borderBottomColor: c.border },
+                    dailyHabits.indexOf(item) ===
+                      Math.min(4, dailyHabits.length - 1) && {
+                      borderBottomWidth: 0,
+                    },
+                  ]}
+                  onPress={() => toggleHabit(item.id)}
+                  activeOpacity={0.6}
+                >
+                  <View
+                    style={[
+                      styles.checkWrap,
+                      {
+                        backgroundColor: item.completed
+                          ? Colors.accent
+                          : "transparent",
+                        borderColor: item.completed ? Colors.accent : c.border,
+                      },
+                    ]}
+                  >
+                    {item.completed && (
+                      <MaterialIcons name="check" size={14} color="#fff" />
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      styles.habitName,
+                      {
+                        color: item.completed ? c.textMuted : c.text,
+                        textDecorationLine: item.completed
+                          ? "line-through"
+                          : "none",
+                      },
+                    ]}
+                  >
+                    {item.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Goals */}
+        <View
+          style={[styles.sectionHeader, { backgroundColor: "transparent" }]}
+        >
+          <Text style={[styles.sectionTitle, { color: c.text }]}>
+            Your Goals
+          </Text>
+          <TouchableOpacity
+            onPress={() => router.push("/create-goal" as Href)}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.seeAll, { color: Colors.accent }]}>+ New</Text>
           </TouchableOpacity>
         </View>
 
@@ -82,97 +249,98 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
         ) : (
-          <FlatList
-            data={goals}
-            keyExtractor={(item) => item.id.toString()}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 20 }}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[
-                  styles.goalCard,
-                  { backgroundColor: c.card, borderColor: c.border },
-                ]}
-                onPress={() =>
-                  router.push({
-                    pathname: "/goal-details",
-                    params: { id: item.id },
-                  } as Href)
-                }
-                activeOpacity={0.7}
+          goals.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={[
+                styles.goalCard,
+                { backgroundColor: c.card, borderColor: c.border },
+              ]}
+              onPress={() =>
+                router.push({
+                  pathname: "/goal-details",
+                  params: { id: item.id },
+                } as Href)
+              }
+              activeOpacity={0.7}
+            >
+              <View
+                style={[styles.goalHeader, { backgroundColor: "transparent" }]}
               >
                 <View
-                  style={[
-                    styles.goalHeader,
-                    { backgroundColor: "transparent" },
-                  ]}
+                  style={[styles.iconWrap, { backgroundColor: c.surfaceAlt }]}
                 >
-                  <View
-                    style={[styles.iconWrap, { backgroundColor: c.surfaceAlt }]}
-                  >
-                    <Text style={styles.goalIcon}>{item.icon ?? "🎯"}</Text>
-                  </View>
-                  <View
-                    style={[
-                      styles.goalInfo,
-                      { backgroundColor: "transparent" },
-                    ]}
-                  >
-                    <Text style={[styles.goalName, { color: c.text }]}>
-                      {item.name}
-                    </Text>
-                    <Text
-                      style={[styles.goalHours, { color: c.textSecondary }]}
-                    >
-                      {item.totalHours.toFixed(1)}h of {item.goalHours ?? 100}h
-                    </Text>
-                  </View>
-                  <View
-                    style={[
-                      styles.percentBadge,
-                      {
-                        backgroundColor:
-                          item.percentage >= 75
-                            ? c.successLight
-                            : Colors.accentLight,
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.percentText,
-                        {
-                          color:
-                            item.percentage >= 75 ? c.success : Colors.accent,
-                        },
-                      ]}
-                    >
-                      {item.percentage}%
-                    </Text>
-                  </View>
+                  <Text style={styles.goalIcon}>{item.icon ?? "🎯"}</Text>
+                </View>
+                <View
+                  style={[styles.goalInfo, { backgroundColor: "transparent" }]}
+                >
+                  <Text style={[styles.goalName, { color: c.text }]}>
+                    {item.name}
+                  </Text>
+                  <Text style={[styles.goalHours, { color: c.textSecondary }]}>
+                    {item.totalHours.toFixed(1)}h of {item.goalHours ?? 100}h
+                  </Text>
                 </View>
                 <View
                   style={[
-                    styles.progressBarBg,
-                    { backgroundColor: c.surfaceAlt },
+                    styles.percentBadge,
+                    {
+                      backgroundColor:
+                        item.percentage >= 75
+                          ? c.successLight
+                          : Colors.accentLight,
+                    },
                   ]}
                 >
-                  <View
+                  <Text
                     style={[
-                      styles.progressBarFill,
+                      styles.percentText,
                       {
-                        width: `${item.percentage}%`,
-                        backgroundColor:
+                        color:
                           item.percentage >= 75 ? c.success : Colors.accent,
                       },
                     ]}
-                  />
+                  >
+                    {item.percentage}%
+                  </Text>
                 </View>
-              </TouchableOpacity>
-            )}
-          />
+              </View>
+              <View
+                style={[
+                  styles.progressBarBg,
+                  { backgroundColor: c.surfaceAlt },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.progressBarFill,
+                    {
+                      width: `${item.percentage}%`,
+                      backgroundColor:
+                        item.percentage >= 75 ? c.success : Colors.accent,
+                    },
+                  ]}
+                />
+              </View>
+              <View
+                style={[styles.weekRow, { backgroundColor: "transparent" }]}
+              >
+                <MaterialIcons
+                  name="trending-up"
+                  size={14}
+                  color={Colors.accent}
+                />
+                <Text style={[styles.weekText, { color: c.textSecondary }]}>
+                  Last 7 days: {formatDuration(item.last7DaysSeconds)}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))
         )}
-      </View>
+
+        <View style={{ height: 30, backgroundColor: "transparent" }} />
+      </ScrollView>
     </ScreenLayout>
   );
 }
@@ -183,10 +351,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 24,
-    backgroundColor: "transparent",
+    marginBottom: 20,
   },
-  greeting: { fontSize: 14, color: "#999999", marginBottom: 2 },
+  greeting: { fontSize: 14, marginBottom: 2 },
   title: { fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
   addBtn: {
     width: 44,
@@ -200,11 +367,84 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
-  emptyContainer: {
-    flex: 1,
+  heroCard: {
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 24,
+    shadowColor: "#C62828",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  heroRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+  },
+  heroStat: { alignItems: "center", flex: 1 },
+  heroIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
     justifyContent: "center",
-    paddingBottom: 80,
+    marginBottom: 8,
+  },
+  heroValue: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#fff",
+    marginBottom: 2,
+  },
+  heroLabel: {
+    fontSize: 11,
+    color: "rgba(255,255,255,0.75)",
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.3,
+  },
+  heroDivider: { width: 1, height: 50, borderRadius: 1 },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  sectionTitle: { fontSize: 20, fontWeight: "700" },
+  seeAll: { fontSize: 14, fontWeight: "600" },
+  habitsCard: {
+    borderRadius: 16,
+    padding: 4,
+    paddingHorizontal: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  habitRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 13,
+    borderBottomWidth: 1,
+  },
+  checkWrap: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  habitName: { fontSize: 15, fontWeight: "500" },
+  emptyContainer: {
+    alignItems: "center",
+    paddingVertical: 40,
     backgroundColor: "transparent",
   },
   emptyIconWrap: {
@@ -273,6 +513,9 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     overflow: "hidden",
+    marginBottom: 10,
   },
   progressBarFill: { height: 6, borderRadius: 3 },
+  weekRow: { flexDirection: "row", alignItems: "center" },
+  weekText: { fontSize: 12, marginLeft: 5 },
 });
