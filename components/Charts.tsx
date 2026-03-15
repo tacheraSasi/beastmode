@@ -40,7 +40,7 @@ export function MiniLineChart({
           backgroundColor: "transparent",
           backgroundGradientFrom: c.card,
           backgroundGradientTo: c.card,
-          decimalCount: 1,
+          decimalPlaces: 1,
           color: () => Colors.accent,
           labelColor: () => c.textMuted,
           propsForDots: {
@@ -98,7 +98,7 @@ export function MiniBarChart({
           backgroundColor: "transparent",
           backgroundGradientFrom: c.card,
           backgroundGradientTo: c.card,
-          decimalCount: 0,
+          decimalPlaces: 0,
           color: () => Colors.accent,
           labelColor: () => c.textMuted,
           barPercentage: 0.6,

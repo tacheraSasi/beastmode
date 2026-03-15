@@ -1,8 +1,11 @@
+import { useEffect, useState } from "react";
 import {
   StyleSheet,
   TouchableOpacity,
+  Switch,
   Linking,
   ScrollView,
+  Alert,
 } from "react-native";
 
 import { Text, View, useColors } from "@/components/Themed";
@@ -10,12 +13,63 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useThemeMode } from "@/context/theme-context";
 import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
+import {
+  requestNotificationPermission,
+  scheduleDailyHabitReminder,
+  scheduleDailySessionReminder,
+  cancelHabitReminders,
+  cancelSessionReminders,
+  hasScheduledReminders,
+} from "@/utils/notifications";
 
 type ThemeOption = "system" | "light" | "dark";
 
 export default function SettingsScreen() {
   const { mode, setMode } = useThemeMode();
   const c = useColors();
+  const [habitReminders, setHabitReminders] = useState(false);
+  const [sessionReminders, setSessionReminders] = useState(false);
+
+  useEffect(() => {
+    hasScheduledReminders().then((r) => {
+      setHabitReminders(r.habits);
+      setSessionReminders(r.sessions);
+    });
+  }, []);
+
+  const toggleHabitReminders = async (value: boolean) => {
+    if (value) {
+      const granted = await requestNotificationPermission();
+      if (!granted) {
+        Alert.alert(
+          "Permission Required",
+          "Please enable notifications in your device settings.",
+        );
+        return;
+      }
+      await scheduleDailyHabitReminder(9, 0);
+    } else {
+      await cancelHabitReminders();
+    }
+    setHabitReminders(value);
+  };
+
+  const toggleSessionReminders = async (value: boolean) => {
+    if (value) {
+      const granted = await requestNotificationPermission();
+      if (!granted) {
+        Alert.alert(
+          "Permission Required",
+          "Please enable notifications in your device settings.",
+        );
+        return;
+      }
+      await scheduleDailySessionReminder(18, 0);
+    } else {
+      await cancelSessionReminders();
+    }
+    setSessionReminders(value);
+  };
 
   const themeOptions: {
     value: ThemeOption;
@@ -83,6 +137,69 @@ export default function SettingsScreen() {
               )}
             </TouchableOpacity>
           ))}
+        </View>
+
+        {/* Notifications */}
+        <Text style={[styles.sectionLabel, { color: c.textSecondary }]}>
+          NOTIFICATIONS
+        </Text>
+        <View
+          style={[
+            styles.card,
+            { backgroundColor: c.card, borderColor: c.border },
+          ]}
+        >
+          <View
+            style={[
+              styles.notifRow,
+              { borderBottomWidth: 1, borderBottomColor: c.border },
+            ]}
+          >
+            <MaterialIcons
+              name="notifications-active"
+              size={20}
+              color={habitReminders ? Colors.accent : c.textMuted}
+            />
+            <View
+              style={[styles.notifInfo, { backgroundColor: "transparent" }]}
+            >
+              <Text style={[styles.notifLabel, { color: c.text }]}>
+                Habit Reminders
+              </Text>
+              <Text style={[styles.notifSub, { color: c.textMuted }]}>
+                Daily at 9:00 AM
+              </Text>
+            </View>
+            <Switch
+              value={habitReminders}
+              onValueChange={toggleHabitReminders}
+              trackColor={{ false: c.border, true: Colors.accentLight }}
+              thumbColor={habitReminders ? Colors.accent : c.textMuted}
+            />
+          </View>
+          <View style={styles.notifRow}>
+            <MaterialIcons
+              name="timer"
+              size={20}
+              color={sessionReminders ? Colors.accent : c.textMuted}
+            />
+            <View
+              style={[styles.notifInfo, { backgroundColor: "transparent" }]}
+            >
+              <Text style={[styles.notifLabel, { color: c.text }]}>
+                Session Reminders
+              </Text>
+              <Text style={[styles.notifSub, { color: c.textMuted }]}>
+                Daily at 6:00 PM
+              </Text>
+            </View>
+            <Switch
+              value={sessionReminders}
+              onValueChange={toggleSessionReminders}
+              trackColor={{ false: c.border, true: Colors.accentLight }}
+              thumbColor={sessionReminders ? Colors.accent : c.textMuted}
+            />
+          </View>
         </View>
 
         {/* About */}
@@ -182,6 +299,16 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   themeLabel: { flex: 1, fontSize: 15, marginLeft: 12 },
+  notifRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    backgroundColor: "transparent",
+  },
+  notifInfo: { flex: 1, marginLeft: 12 },
+  notifLabel: { fontSize: 15, fontWeight: "600" },
+  notifSub: { fontSize: 12, marginTop: 2 },
   aboutRow: {
     flexDirection: "row",
     justifyContent: "space-between",
