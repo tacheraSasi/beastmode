@@ -41,123 +41,138 @@ export default function HomeScreen() {
 
   return (
     <ScreenLayout insideTabs>
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={{ backgroundColor: "transparent" }}>
-          <Text style={styles.greeting}>Welcome back</Text>
-          <Text style={[styles.title, { color: c.text }]}>Your Goals</Text>
-        </View>
-        <TouchableOpacity
-          style={[styles.addBtn, { backgroundColor: Colors.accent }]}
-          onPress={() => router.push("/create-goal" as Href)}
-          activeOpacity={0.8}
-        >
-          <MaterialIcons name="add" size={22} color="#fff" />
-        </TouchableOpacity>
-      </View>
-
-      {goals.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <View
-            style={[
-              styles.emptyIconWrap,
-              { backgroundColor: Colors.accentLight },
-            ]}
-          >
-            <MaterialIcons name="flag" size={40} color={Colors.accent} />
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={{ backgroundColor: "transparent" }}>
+            <Text style={styles.greeting}>Welcome back</Text>
+            <Text style={[styles.title, { color: c.text }]}>Your Goals</Text>
           </View>
-          <Text style={[styles.emptyTitle, { color: c.text }]}>
-            No goals yet
-          </Text>
-          <Text style={[styles.emptyText, { color: c.textSecondary }]}>
-            Set a goal and start tracking your progress
-          </Text>
           <TouchableOpacity
-            style={[styles.createBtn, { backgroundColor: Colors.accent }]}
+            style={[styles.addBtn, { backgroundColor: Colors.accent }]}
             onPress={() => router.push("/create-goal" as Href)}
             activeOpacity={0.8}
           >
-            <MaterialIcons name="add" size={20} color="#fff" />
-            <Text style={styles.createBtnText}>Create Your First Goal</Text>
+            <MaterialIcons name="add" size={22} color="#fff" />
           </TouchableOpacity>
         </View>
-      ) : (
-        <FlatList
-          data={goals}
-          keyExtractor={(item) => item.id.toString()}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[styles.goalCard, { backgroundColor: c.card, borderColor: c.border }]}
-              onPress={() =>
-                router.push({
-                  pathname: "/goal-details",
-                  params: { id: item.id },
-                } as Href)
-              }
-              activeOpacity={0.7}
+
+        {goals.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <View
+              style={[
+                styles.emptyIconWrap,
+                { backgroundColor: Colors.accentLight },
+              ]}
             >
-              <View style={[styles.goalHeader, { backgroundColor: "transparent" }]}>
-                <View
-                  style={[
-                    styles.iconWrap,
-                    { backgroundColor: c.surfaceAlt },
-                  ]}
-                >
-                  <Text style={styles.goalIcon}>{item.icon ?? "🎯"}</Text>
-                </View>
-                <View style={[styles.goalInfo, { backgroundColor: "transparent" }]}>
-                  <Text style={[styles.goalName, { color: c.text }]}>
-                    {item.name}
-                  </Text>
-                  <Text style={[styles.goalHours, { color: c.textSecondary }]}>
-                    {item.totalHours.toFixed(1)}h of {item.goalHours ?? 100}h
-                  </Text>
-                </View>
-                <View
-                  style={[
-                    styles.percentBadge,
-                    {
-                      backgroundColor:
-                        item.percentage >= 75
-                          ? c.successLight
-                          : Colors.accentLight,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.percentText,
-                      {
-                        color:
-                          item.percentage >= 75 ? c.success : Colors.accent,
-                      },
-                    ]}
-                  >
-                    {item.percentage}%
-                  </Text>
-                </View>
-              </View>
-              <View
-                style={[styles.progressBarBg, { backgroundColor: c.surfaceAlt }]}
+              <MaterialIcons name="flag" size={40} color={Colors.accent} />
+            </View>
+            <Text style={[styles.emptyTitle, { color: c.text }]}>
+              No goals yet
+            </Text>
+            <Text style={[styles.emptyText, { color: c.textSecondary }]}>
+              Set a goal and start tracking your progress
+            </Text>
+            <TouchableOpacity
+              style={[styles.createBtn, { backgroundColor: Colors.accent }]}
+              onPress={() => router.push("/create-goal" as Href)}
+              activeOpacity={0.8}
+            >
+              <MaterialIcons name="add" size={20} color="#fff" />
+              <Text style={styles.createBtnText}>Create Your First Goal</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <FlatList
+            data={goals}
+            keyExtractor={(item) => item.id.toString()}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[
+                  styles.goalCard,
+                  { backgroundColor: c.card, borderColor: c.border },
+                ]}
+                onPress={() =>
+                  router.push({
+                    pathname: "/goal-details",
+                    params: { id: item.id },
+                  } as Href)
+                }
+                activeOpacity={0.7}
               >
                 <View
                   style={[
-                    styles.progressBarFill,
-                    {
-                      width: `${item.percentage}%`,
-                      backgroundColor:
-                        item.percentage >= 75 ? c.success : Colors.accent,
-                    },
+                    styles.goalHeader,
+                    { backgroundColor: "transparent" },
                   ]}
-                />
-              </View>
-            </TouchableOpacity>
-          )}
-        />
-      )}
-    </View>
+                >
+                  <View
+                    style={[styles.iconWrap, { backgroundColor: c.surfaceAlt }]}
+                  >
+                    <Text style={styles.goalIcon}>{item.icon ?? "🎯"}</Text>
+                  </View>
+                  <View
+                    style={[
+                      styles.goalInfo,
+                      { backgroundColor: "transparent" },
+                    ]}
+                  >
+                    <Text style={[styles.goalName, { color: c.text }]}>
+                      {item.name}
+                    </Text>
+                    <Text
+                      style={[styles.goalHours, { color: c.textSecondary }]}
+                    >
+                      {item.totalHours.toFixed(1)}h of {item.goalHours ?? 100}h
+                    </Text>
+                  </View>
+                  <View
+                    style={[
+                      styles.percentBadge,
+                      {
+                        backgroundColor:
+                          item.percentage >= 75
+                            ? c.successLight
+                            : Colors.accentLight,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.percentText,
+                        {
+                          color:
+                            item.percentage >= 75 ? c.success : Colors.accent,
+                        },
+                      ]}
+                    >
+                      {item.percentage}%
+                    </Text>
+                  </View>
+                </View>
+                <View
+                  style={[
+                    styles.progressBarBg,
+                    { backgroundColor: c.surfaceAlt },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.progressBarFill,
+                      {
+                        width: `${item.percentage}%`,
+                        backgroundColor:
+                          item.percentage >= 75 ? c.success : Colors.accent,
+                      },
+                    ]}
+                  />
+                </View>
+              </TouchableOpacity>
+            )}
+          />
+        )}
+      </View>
     </ScreenLayout>
   );
 }
@@ -260,4 +275,4 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   progressBarFill: { height: 6, borderRadius: 3 },
-})
+});

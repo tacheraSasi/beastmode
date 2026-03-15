@@ -5,6 +5,7 @@ import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { getGoalById, getActiveSession, startSession, endSession } from "@/db";
 import { View, Text, useColors } from "@/components/Themed";
 import Colors from "@/constants/Colors";
+import ScreenLayout from "@/components/ScreenLayout";
 import type { Goal, Session } from "@/db";
 
 export default function StartSessionScreen() {
@@ -74,15 +75,18 @@ export default function StartSessionScreen() {
 
   if (!goal) {
     return (
+      <ScreenLayout fullScreen>
       <View style={styles.container}>
         <Text style={[styles.loadingText, { color: c.textMuted }]}>
           Loading...
         </Text>
       </View>
+      </ScreenLayout>
     );
   }
 
   return (
+    <ScreenLayout fullScreen>
     <View style={styles.container}>
       {/* Goal info */}
       <View style={[styles.goalInfo, { backgroundColor: "transparent" }]}>
@@ -159,6 +163,7 @@ export default function StartSessionScreen() {
         )}
       </View>
     </View>
+    </ScreenLayout>
   );
 }
 

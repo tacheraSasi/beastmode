@@ -16,6 +16,7 @@ import {
 } from "@/db";
 import { View, Text, useColors } from "@/components/Themed";
 import Colors from "@/constants/Colors";
+import ScreenLayout from "@/components/ScreenLayout";
 import type { Goal, Session } from "@/db";
 
 export default function GoalDetailsScreen() {
@@ -70,11 +71,13 @@ export default function GoalDetailsScreen() {
 
   if (!goal) {
     return (
+      <ScreenLayout fullScreen>
       <View style={styles.container}>
         <Text style={[styles.loadingText, { color: c.textMuted }]}>
           Loading...
         </Text>
       </View>
+      </ScreenLayout>
     );
   }
 
@@ -84,6 +87,7 @@ export default function GoalDetailsScreen() {
   );
 
   return (
+    <ScreenLayout fullScreen>
     <ScrollView
       style={[styles.container, { backgroundColor: c.background }]}
       showsVerticalScrollIndicator={false}
@@ -229,6 +233,7 @@ export default function GoalDetailsScreen() {
 
       <View style={{ height: 40, backgroundColor: "transparent" }} />
     </ScrollView>
+    </ScreenLayout>
   );
 }
 

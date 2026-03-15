@@ -5,6 +5,7 @@ import { useLocalSearchParams, useFocusEffect } from "expo-router";
 import { getGoalById, getSessionsByGoal, deleteSession } from "@/db";
 import { View, Text, useColors } from "@/components/Themed";
 import Colors from "@/constants/Colors";
+import ScreenLayout from "@/components/ScreenLayout";
 import type { Goal, Session } from "@/db";
 
 export default function SessionHistoryScreen() {
@@ -48,6 +49,7 @@ export default function SessionHistoryScreen() {
   };
 
   return (
+    <ScreenLayout fullScreen>
     <View style={styles.container}>
       {goal && (
         <View style={[styles.header, { backgroundColor: "transparent" }]}>
@@ -144,6 +146,7 @@ export default function SessionHistoryScreen() {
         />
       )}
     </View>
+    </ScreenLayout>
   );
 }
 

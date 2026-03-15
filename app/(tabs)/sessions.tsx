@@ -47,144 +47,155 @@ export default function SessionsScreen() {
 
   return (
     <ScreenLayout insideTabs>
-    <View style={styles.container}>
-      <Text style={[styles.title, { color: c.text }]}>Sessions</Text>
+      <View style={styles.container}>
+        <Text style={[styles.title, { color: c.text }]}>Sessions</Text>
 
-      {goals.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <View
-            style={[styles.emptyIconWrap, { backgroundColor: c.surfaceAlt }]}
-          >
-            <MaterialIcons name="timer" size={40} color={c.textMuted} />
-          </View>
-          <Text style={[styles.emptyTitle, { color: c.text }]}>
-            No goals yet
-          </Text>
-          <Text style={[styles.emptyText, { color: c.textSecondary }]}>
-            Create a goal first to start tracking sessions
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={goals}
-          keyExtractor={(item) => item.id.toString()}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
-          renderItem={({ item }) => (
+        {goals.length === 0 ? (
+          <View style={styles.emptyContainer}>
             <View
-              style={[
-                styles.goalCard,
-                { backgroundColor: c.card, borderColor: c.border },
-              ]}
+              style={[styles.emptyIconWrap, { backgroundColor: c.surfaceAlt }]}
             >
+              <MaterialIcons name="timer" size={40} color={c.textMuted} />
+            </View>
+            <Text style={[styles.emptyTitle, { color: c.text }]}>
+              No goals yet
+            </Text>
+            <Text style={[styles.emptyText, { color: c.textSecondary }]}>
+              Create a goal first to start tracking sessions
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={goals}
+            keyExtractor={(item) => item.id.toString()}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            renderItem={({ item }) => (
               <View
-                style={[styles.goalHeader, { backgroundColor: "transparent" }]}
+                style={[
+                  styles.goalCard,
+                  { backgroundColor: c.card, borderColor: c.border },
+                ]}
               >
                 <View
-                  style={[styles.iconWrap, { backgroundColor: c.surfaceAlt }]}
-                >
-                  <Text style={styles.goalIcon}>{item.icon ?? "🎯"}</Text>
-                </View>
-                <Text style={[styles.goalName, { color: c.text }]}>
-                  {item.name}
-                </Text>
-              </View>
-
-              {item.activeSession ? (
-                <TouchableOpacity
                   style={[
-                    styles.activeSession,
-                    { backgroundColor: c.dangerLight },
-                  ]}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/start-session",
-                      params: { goalId: item.id },
-                    } as Href)
-                  }
-                  activeOpacity={0.7}
-                >
-                  <View
-                    style={[styles.liveDot, { backgroundColor: c.danger }]}
-                  />
-                  <Text style={[styles.activeText, { color: c.danger }]}>
-                    Session in progress
-                  </Text>
-                  <View
-                    style={[styles.resumeChip, { backgroundColor: c.danger }]}
-                  >
-                    <Text style={styles.resumeChipText}>Resume</Text>
-                  </View>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  style={[styles.startBtn, { backgroundColor: Colors.accent }]}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/start-session",
-                      params: { goalId: item.id },
-                    } as Href)
-                  }
-                  activeOpacity={0.8}
-                >
-                  <MaterialIcons name="play-arrow" size={20} color="#fff" />
-                  <Text style={styles.startBtnText}>Start Session</Text>
-                </TouchableOpacity>
-              )}
-
-              {item.recentSessions.length > 0 && (
-                <View
-                  style={[
-                    styles.recentSection,
+                    styles.goalHeader,
                     { backgroundColor: "transparent" },
                   ]}
                 >
-                  <Text style={[styles.recentLabel, { color: c.textMuted }]}>
-                    RECENT
+                  <View
+                    style={[styles.iconWrap, { backgroundColor: c.surfaceAlt }]}
+                  >
+                    <Text style={styles.goalIcon}>{item.icon ?? "🎯"}</Text>
+                  </View>
+                  <Text style={[styles.goalName, { color: c.text }]}>
+                    {item.name}
                   </Text>
-                  {item.recentSessions.map((s) => (
-                    <View
-                      key={s.id}
-                      style={[
-                        styles.sessionRow,
-                        {
-                          backgroundColor: "transparent",
-                          borderBottomColor: c.border,
-                        },
-                      ]}
-                    >
-                      <Text
-                        style={[styles.sessionDate, { color: c.textSecondary }]}
-                      >
-                        {s.startTime.toLocaleDateString()}
-                      </Text>
-                      <Text style={[styles.sessionDuration, { color: c.text }]}>
-                        {formatDuration(s.durationSeconds)}
-                      </Text>
-                    </View>
-                  ))}
+                </View>
+
+                {item.activeSession ? (
                   <TouchableOpacity
+                    style={[
+                      styles.activeSession,
+                      { backgroundColor: c.dangerLight },
+                    ]}
                     onPress={() =>
                       router.push({
-                        pathname: "/session-history",
+                        pathname: "/start-session",
                         params: { goalId: item.id },
                       } as Href)
                     }
                     activeOpacity={0.7}
                   >
-                    <Text
-                      style={[styles.viewAllText, { color: Colors.accent }]}
-                    >
-                      View All History →
+                    <View
+                      style={[styles.liveDot, { backgroundColor: c.danger }]}
+                    />
+                    <Text style={[styles.activeText, { color: c.danger }]}>
+                      Session in progress
                     </Text>
+                    <View
+                      style={[styles.resumeChip, { backgroundColor: c.danger }]}
+                    >
+                      <Text style={styles.resumeChipText}>Resume</Text>
+                    </View>
                   </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          )}
-        />
-      )}
-    </View>
+                ) : (
+                  <TouchableOpacity
+                    style={[
+                      styles.startBtn,
+                      { backgroundColor: Colors.accent },
+                    ]}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/start-session",
+                        params: { goalId: item.id },
+                      } as Href)
+                    }
+                    activeOpacity={0.8}
+                  >
+                    <MaterialIcons name="play-arrow" size={20} color="#fff" />
+                    <Text style={styles.startBtnText}>Start Session</Text>
+                  </TouchableOpacity>
+                )}
+
+                {item.recentSessions.length > 0 && (
+                  <View
+                    style={[
+                      styles.recentSection,
+                      { backgroundColor: "transparent" },
+                    ]}
+                  >
+                    <Text style={[styles.recentLabel, { color: c.textMuted }]}>
+                      RECENT
+                    </Text>
+                    {item.recentSessions.map((s) => (
+                      <View
+                        key={s.id}
+                        style={[
+                          styles.sessionRow,
+                          {
+                            backgroundColor: "transparent",
+                            borderBottomColor: c.border,
+                          },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.sessionDate,
+                            { color: c.textSecondary },
+                          ]}
+                        >
+                          {s.startTime.toLocaleDateString()}
+                        </Text>
+                        <Text
+                          style={[styles.sessionDuration, { color: c.text }]}
+                        >
+                          {formatDuration(s.durationSeconds)}
+                        </Text>
+                      </View>
+                    ))}
+                    <TouchableOpacity
+                      onPress={() =>
+                        router.push({
+                          pathname: "/session-history",
+                          params: { goalId: item.id },
+                        } as Href)
+                      }
+                      activeOpacity={0.7}
+                    >
+                      <Text
+                        style={[styles.viewAllText, { color: Colors.accent }]}
+                      >
+                        View All History →
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            )}
+          />
+        )}
+      </View>
     </ScreenLayout>
   );
 }

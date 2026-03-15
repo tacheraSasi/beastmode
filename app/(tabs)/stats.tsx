@@ -43,9 +43,7 @@ export default function StatsScreen() {
               totalHours: progress.totalHours,
               percentage: Math.min(
                 100,
-                Math.round(
-                  (progress.totalHours / (g.goalHours ?? 100)) * 100,
-                ),
+                Math.round((progress.totalHours / (g.goalHours ?? 100)) * 100),
               ),
               last7DaysSeconds: weekSeconds,
             };
@@ -65,99 +63,130 @@ export default function StatsScreen() {
 
   return (
     <ScreenLayout insideTabs>
-    <ScrollView
-      style={[styles.container, { backgroundColor: c.background }]}
-      showsVerticalScrollIndicator={false}
-    >
-      <Text style={[styles.pageTitle, { color: c.text }]}>Stats</Text>
+      <ScrollView
+        style={[styles.container, { backgroundColor: c.background }]}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={[styles.pageTitle, { color: c.text }]}>Stats</Text>
 
-      <View style={[styles.heroCard, { backgroundColor: Colors.accent }]}>
-        <View style={styles.heroIconWrap}>
-          <MaterialIcons name="local-fire-department" size={28} color="#fff" />
+        <View style={[styles.heroCard, { backgroundColor: Colors.accent }]}>
+          <View style={styles.heroIconWrap}>
+            <MaterialIcons
+              name="local-fire-department"
+              size={28}
+              color="#fff"
+            />
+          </View>
+          <Text style={styles.heroLabel}>Total Hours Logged</Text>
+          <Text style={styles.heroValue}>{totalHoursAll.toFixed(1)}h</Text>
+          <Text style={styles.heroSub}>{stats.length} active goals</Text>
         </View>
-        <Text style={styles.heroLabel}>Total Hours Logged</Text>
-        <Text style={styles.heroValue}>{totalHoursAll.toFixed(1)}h</Text>
-        <Text style={styles.heroSub}>{stats.length} active goals</Text>
-      </View>
 
-      {stats.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={[styles.emptyText, { color: c.textSecondary }]}>
-            No stats yet. Start a session!
-          </Text>
-        </View>
-      ) : (
-        stats.map((g) => (
-          <View
-            key={g.id}
-            style={[styles.statCard, { backgroundColor: c.card, borderColor: c.border }]}
-          >
-            <View style={[styles.statHeader, { backgroundColor: "transparent" }]}>
-              <View style={[styles.iconWrap, { backgroundColor: c.surfaceAlt }]}>
-                <Text style={styles.goalIcon}>{g.icon ?? "🎯"}</Text>
-              </View>
-              <View style={[styles.statInfo, { backgroundColor: "transparent" }]}>
-                <Text style={[styles.goalName, { color: c.text }]}>
-                  {g.name}
-                </Text>
-                <Text style={[styles.goalSub, { color: c.textSecondary }]}>
-                  {g.totalHours.toFixed(1)}h of {g.goalHours ?? 100}h
-                </Text>
-              </View>
+        {stats.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={[styles.emptyText, { color: c.textSecondary }]}>
+              No stats yet. Start a session!
+            </Text>
+          </View>
+        ) : (
+          stats.map((g) => (
+            <View
+              key={g.id}
+              style={[
+                styles.statCard,
+                { backgroundColor: c.card, borderColor: c.border },
+              ]}
+            >
               <View
-                style={[
-                  styles.percentBadge,
-                  {
-                    backgroundColor:
-                      g.percentage >= 75 ? c.successLight : Colors.accentLight,
-                  },
-                ]}
+                style={[styles.statHeader, { backgroundColor: "transparent" }]}
               >
-                <Text
+                <View
+                  style={[styles.iconWrap, { backgroundColor: c.surfaceAlt }]}
+                >
+                  <Text style={styles.goalIcon}>{g.icon ?? "🎯"}</Text>
+                </View>
+                <View
+                  style={[styles.statInfo, { backgroundColor: "transparent" }]}
+                >
+                  <Text style={[styles.goalName, { color: c.text }]}>
+                    {g.name}
+                  </Text>
+                  <Text style={[styles.goalSub, { color: c.textSecondary }]}>
+                    {g.totalHours.toFixed(1)}h of {g.goalHours ?? 100}h
+                  </Text>
+                </View>
+                <View
                   style={[
-                    styles.percentText,
+                    styles.percentBadge,
                     {
-                      color: g.percentage >= 75 ? c.success : Colors.accent,
+                      backgroundColor:
+                        g.percentage >= 75
+                          ? c.successLight
+                          : Colors.accentLight,
                     },
                   ]}
                 >
-                  {g.percentage}%
+                  <Text
+                    style={[
+                      styles.percentText,
+                      {
+                        color: g.percentage >= 75 ? c.success : Colors.accent,
+                      },
+                    ]}
+                  >
+                    {g.percentage}%
+                  </Text>
+                </View>
+              </View>
+
+              <View
+                style={[
+                  styles.progressBarBg,
+                  { backgroundColor: c.surfaceAlt },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.progressBarFill,
+                    {
+                      width: `${g.percentage}%`,
+                      backgroundColor:
+                        g.percentage >= 75 ? c.success : Colors.accent,
+                    },
+                  ]}
+                />
+              </View>
+
+              <View
+                style={[styles.weekRow, { backgroundColor: "transparent" }]}
+              >
+                <MaterialIcons
+                  name="trending-up"
+                  size={16}
+                  color={Colors.accent}
+                />
+                <Text style={[styles.weekText, { color: c.textSecondary }]}>
+                  Last 7 days: {formatDuration(g.last7DaysSeconds)}
                 </Text>
               </View>
             </View>
+          ))
+        )}
 
-            <View style={[styles.progressBarBg, { backgroundColor: c.surfaceAlt }]}>
-              <View
-                style={[
-                  styles.progressBarFill,
-                  {
-                    width: `${g.percentage}%`,
-                    backgroundColor:
-                      g.percentage >= 75 ? c.success : Colors.accent,
-                  },
-                ]}
-              />
-            </View>
-
-            <View style={[styles.weekRow, { backgroundColor: "transparent" }]}>
-              <MaterialIcons name="trending-up" size={16} color={Colors.accent} />
-              <Text style={[styles.weekText, { color: c.textSecondary }]}>
-                Last 7 days: {formatDuration(g.last7DaysSeconds)}
-              </Text>
-            </View>
-          </View>
-        ))
-      )}
-
-      <View style={{ height: 30, backgroundColor: "transparent" }} />
-    </ScrollView>
+        <View style={{ height: 30, backgroundColor: "transparent" }} />
+      </ScrollView>
     </ScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 20, paddingTop: 16 },
-  pageTitle: { fontSize: 28, fontWeight: "800", letterSpacing: -0.5, marginBottom: 20 },
+  pageTitle: {
+    fontSize: 28,
+    fontWeight: "800",
+    letterSpacing: -0.5,
+    marginBottom: 20,
+  },
   heroCard: {
     borderRadius: 20,
     padding: 24,
@@ -178,8 +207,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 10,
   },
-  heroLabel: { fontSize: 14, color: "rgba(255,255,255,0.8)", fontWeight: "600" },
-  heroValue: { fontSize: 44, fontWeight: "800", color: "#fff", marginVertical: 4 },
+  heroLabel: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.8)",
+    fontWeight: "600",
+  },
+  heroValue: {
+    fontSize: 44,
+    fontWeight: "800",
+    color: "#fff",
+    marginVertical: 4,
+  },
   heroSub: { fontSize: 13, color: "rgba(255,255,255,0.7)" },
   emptyContainer: {
     alignItems: "center",
@@ -230,4 +268,4 @@ const styles = StyleSheet.create({
   progressBarFill: { height: 6, borderRadius: 3 },
   weekRow: { flexDirection: "row", alignItems: "center" },
   weekText: { fontSize: 13, marginLeft: 6 },
-})
+});

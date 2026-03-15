@@ -9,6 +9,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { getGoalById, updateGoal } from "@/db";
 import { View, Text, useColors } from "@/components/Themed";
 import Colors from "@/constants/Colors";
+import ScreenLayout from "@/components/ScreenLayout";
 
 const ICON_OPTIONS = [
   "🎯",
@@ -55,6 +56,7 @@ export default function EditGoalScreen() {
   };
 
   return (
+    <ScreenLayout fullScreen keyboardAware>
     <ScrollView
       style={[styles.container, { backgroundColor: c.background }]}
       showsVerticalScrollIndicator={false}
@@ -124,6 +126,7 @@ export default function EditGoalScreen() {
         <Text style={styles.saveBtnText}>Save Changes</Text>
       </TouchableOpacity>
     </ScrollView>
+    </ScreenLayout>
   );
 }
 

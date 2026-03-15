@@ -4,6 +4,7 @@ import { useHabits } from "@/context/habits-context";
 import { DateSelector } from "@/components/DateSelector";
 import { View, Text, useColors } from "@/components/Themed";
 import Colors from "@/constants/Colors";
+import ScreenLayout from "@/components/ScreenLayout";
 
 export default function HabitTrackerScreen() {
   const {
@@ -16,6 +17,7 @@ export default function HabitTrackerScreen() {
   const c = useColors();
 
   return (
+    <ScreenLayout fullScreen>
     <View style={styles.container}>
       <DateSelector date={selectedDate} onDateChange={setSelectedDate} />
       {habitsList.length === 0 ? (
@@ -83,6 +85,7 @@ export default function HabitTrackerScreen() {
         />
       )}
     </View>
+    </ScreenLayout>
   );
 }
 
