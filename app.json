@@ -2,7 +2,7 @@
   "expo": {
     "name": "beastmode",
     "slug": "beastmode",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icons/ios/AppIcon@3x.png",
     "scheme": "beastmode",
@@ -31,6 +31,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "33715d47-d26f-4042-b05d-28553e82ebf5"
+      }
     }
   }
 }
