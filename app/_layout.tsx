@@ -62,7 +62,7 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
+  const theme = Colors[(colorScheme ?? "light") as "light" | "dark"];
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
@@ -77,7 +77,7 @@ function RootLayoutNav() {
               color: theme.text,
             },
             headerShadowVisible: false,
-            headerBackTitleVisible: false,
+            headerBackTitle: "",
             contentStyle: { backgroundColor: theme.background },
           }}
         >

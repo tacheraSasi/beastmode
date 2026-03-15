@@ -48,7 +48,14 @@ export default function CreateGoalScreen() {
     >
       <Text style={[styles.label, { color: c.textSecondary }]}>Goal Name</Text>
       <TextInput
-        style={[styles.input, { backgroundColor: c.surfaceAlt, borderColor: c.border, color: c.text }]}
+        style={[
+          styles.input,
+          {
+            backgroundColor: c.surfaceAlt,
+            borderColor: c.border,
+            color: c.text,
+          },
+        ]}
         value={name}
         onChangeText={setName}
         placeholder="e.g. Learn Guitar"
@@ -78,7 +85,14 @@ export default function CreateGoalScreen() {
         Target Hours
       </Text>
       <TextInput
-        style={[styles.input, { backgroundColor: c.surfaceAlt, borderColor: c.border, color: c.text }]}
+        style={[
+          styles.input,
+          {
+            backgroundColor: c.surfaceAlt,
+            borderColor: c.border,
+            color: c.text,
+          },
+        ]}
         value={goalHours}
         onChangeText={setGoalHours}
         keyboardType="numeric"

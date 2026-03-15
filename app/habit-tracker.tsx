@@ -20,8 +20,14 @@ export default function HabitTrackerScreen() {
       <DateSelector date={selectedDate} onDateChange={setSelectedDate} />
       {habitsList.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <View style={[styles.emptyIconWrap, { backgroundColor: c.surfaceAlt }]}>
-            <MaterialIcons name="check-circle-outline" size={40} color={c.textMuted} />
+          <View
+            style={[styles.emptyIconWrap, { backgroundColor: c.surfaceAlt }]}
+          >
+            <MaterialIcons
+              name="check-circle-outline"
+              size={40}
+              color={c.textMuted}
+            />
           </View>
           <Text style={[styles.emptyTitle, { color: c.text }]}>No habits</Text>
           <Text style={[styles.emptyText, { color: c.textSecondary }]}>
@@ -40,7 +46,9 @@ export default function HabitTrackerScreen() {
               onPress={() => toggleHabit(item.id)}
               activeOpacity={0.6}
             >
-              <View style={[styles.habitLeft, { backgroundColor: "transparent" }]}>
+              <View
+                style={[styles.habitLeft, { backgroundColor: "transparent" }]}
+              >
                 <View
                   style={[
                     styles.checkWrap,
