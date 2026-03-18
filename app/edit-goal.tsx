@@ -99,24 +99,6 @@ export default function EditGoalScreen() {
           placeholderTextColor={c.textMuted}
         />
 
-        <Text style={[styles.label, { color: c.textSecondary }]}>Icon</Text>
-        <View style={[styles.iconRow, { backgroundColor: "transparent" }]}>
-          {ICON_OPTIONS.map((ic) => (
-            <TouchableOpacity
-              key={ic}
-              style={[
-                styles.iconBtn,
-                { backgroundColor: c.surfaceAlt },
-                icon === ic && styles.iconBtnSelected,
-              ]}
-              onPress={() => setIcon(ic)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.iconText}>{ic}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
         <Text style={[styles.label, { color: c.textSecondary }]}>
           Target Hours
         </Text>
@@ -135,6 +117,24 @@ export default function EditGoalScreen() {
           placeholder="100"
           placeholderTextColor={c.textMuted}
         />
+
+        <Text style={[styles.label, { color: c.textSecondary }]}>Icon</Text>
+        <View style={[styles.iconRow, { backgroundColor: "transparent" }]}>
+          {ICON_OPTIONS.map((ic) => (
+            <TouchableOpacity
+              key={ic}
+              style={[
+                styles.iconBtn,
+                { backgroundColor: c.surfaceAlt },
+                icon === ic && styles.iconBtnSelected,
+              ]}
+              onPress={() => setIcon(ic)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.iconText}>{ic}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
         <TouchableOpacity
           style={[
@@ -192,11 +192,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 36,
     marginBottom: 40,
-    shadowColor: "#C62828",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 6,
   },
   saveBtnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
 });

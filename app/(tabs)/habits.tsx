@@ -440,11 +440,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 16,
     borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
   },
   summaryRow: {
     flexDirection: "row",
