@@ -215,11 +215,6 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     paddingHorizontal: 44,
     borderRadius: 28,
-    shadowColor: "#C62828",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 8,
   },
   stopBtn: {
     flexDirection: "row",
@@ -227,11 +222,6 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     paddingHorizontal: 44,
     borderRadius: 28,
-    shadowColor: "#C62828",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 8,
   },
   btnText: { color: "#fff", fontSize: 18, fontWeight: "700", marginLeft: 8 },
 });

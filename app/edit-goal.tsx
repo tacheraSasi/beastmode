@@ -98,7 +98,7 @@ export default function EditGoalScreen() {
           placeholder="e.g. Learn Guitar"
           placeholderTextColor={c.textMuted}
         />
-        
+
         <Text style={[styles.label, { color: c.textSecondary }]}>
           Target Hours
         </Text>
@@ -192,11 +192,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 36,
     marginBottom: 40,
-    shadowColor: "#C62828",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 6,
   },
   saveBtnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
 });
