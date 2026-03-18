@@ -1,5 +1,4 @@
 import * as Notifications from "expo-notifications";
-import { Platform } from "react-native";
 
 // Configure how notifications appear when the app is in the foreground
 Notifications.setNotificationHandler({
@@ -29,7 +28,7 @@ export async function scheduleDailyHabitReminder(hour: number = 9, minute: numbe
   await Notifications.scheduleNotificationAsync({
     content: {
       title: "🔥 Time to check your habits!",
-      body: "Don't break your streak — log your habits for today.",
+      body: "Don't break your streak log your habits for today.",
       sound: true,
     },
     trigger: {
@@ -48,7 +47,7 @@ export async function scheduleDailySessionReminder(hour: number = 18, minute: nu
   await Notifications.scheduleNotificationAsync({
     content: {
       title: "💪 Ready for a session?",
-      body: "Put in the work — start a focus session now.",
+      body: "Put in the work start a focus session now.",
       sound: true,
     },
     trigger: {
