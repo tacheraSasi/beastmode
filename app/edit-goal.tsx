@@ -98,25 +98,7 @@ export default function EditGoalScreen() {
           placeholder="e.g. Learn Guitar"
           placeholderTextColor={c.textMuted}
         />
-
-        <Text style={[styles.label, { color: c.textSecondary }]}>Icon</Text>
-        <View style={[styles.iconRow, { backgroundColor: "transparent" }]}>
-          {ICON_OPTIONS.map((ic) => (
-            <TouchableOpacity
-              key={ic}
-              style={[
-                styles.iconBtn,
-                { backgroundColor: c.surfaceAlt },
-                icon === ic && styles.iconBtnSelected,
-              ]}
-              onPress={() => setIcon(ic)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.iconText}>{ic}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
+        
         <Text style={[styles.label, { color: c.textSecondary }]}>
           Target Hours
         </Text>
@@ -135,6 +117,24 @@ export default function EditGoalScreen() {
           placeholder="100"
           placeholderTextColor={c.textMuted}
         />
+
+        <Text style={[styles.label, { color: c.textSecondary }]}>Icon</Text>
+        <View style={[styles.iconRow, { backgroundColor: "transparent" }]}>
+          {ICON_OPTIONS.map((ic) => (
+            <TouchableOpacity
+              key={ic}
+              style={[
+                styles.iconBtn,
+                { backgroundColor: c.surfaceAlt },
+                icon === ic && styles.iconBtnSelected,
+              ]}
+              onPress={() => setIcon(ic)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.iconText}>{ic}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
         <TouchableOpacity
           style={[
