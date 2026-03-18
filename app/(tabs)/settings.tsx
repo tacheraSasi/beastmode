@@ -258,11 +258,6 @@ export default function SettingsScreen() {
             View on GitHub
           </Text>
         </TouchableOpacity>
-
-        <Text style={[styles.footer, { color: c.textMuted }]}>
-          Built with Expo & React Native
-        </Text>
-
         <View style={{ height: 30, backgroundColor: "transparent" }} />
       </ScrollView>
     </ScreenLayout>
