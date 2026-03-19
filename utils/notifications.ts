@@ -73,6 +73,39 @@ export async function scheduleDailyGoalSpecificReminder(title: string, body: str
   });
 }
 
+/** Schedule or update a daily reminder for a specific goal. */
+export async function scheduleGoalReminder(goalId: number, goalName: string, goalIcon: string, hour: number, minute: number) {
+  // Cancel existing reminder for this goal first
+  await cancelGoalReminder(goalId);
+
+  const granted = await requestNotificationPermission();
+  if (!granted) return false;
+
+  await Notifications.scheduleNotificationAsync({
+    identifier: `goal-reminder-${goalId}`,
+    content: {
+      title: `${goalIcon} Time for ${goalName}!`,
+      body: "Stay consistent — put in the work today.",
+      sound: true,
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+      hour,
+      minute,
+    },
+  });
+  return true;
+}
+
+/** Cancel the daily reminder for a specific goal. */
+export async function cancelGoalReminder(goalId: number) {
+  try {
+    await Notifications.cancelScheduledNotificationAsync(`goal-reminder-${goalId}`);
+  } catch {
+    // Notification may not exist yet, ignore
+  }
+}
+
 /** Cancel all habit-related scheduled notifications. */
 export async function cancelHabitReminders() {
   const all = await Notifications.getAllScheduledNotificationsAsync();

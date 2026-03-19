@@ -63,17 +63,21 @@ export async function createGoal(data: {
   name: string;
   icon?: string;
   goalHours?: number;
+  reminderHour?: number | null;
+  reminderMinute?: number | null;
 }) {
   return db.insert(goals).values({
     name: data.name,
     icon: data.icon,
     goalHours: data.goalHours ?? 100,
+    reminderHour: data.reminderHour ?? null,
+    reminderMinute: data.reminderMinute ?? null,
   });
 }
 
 export async function updateGoal(
   id: number,
-  data: Partial<Pick<Goal, "name" | "icon" | "goalHours">>,
+  data: Partial<Pick<Goal, "name" | "icon" | "goalHours" | "reminderHour" | "reminderMinute">>,
 ) {
   return db
     .update(goals)

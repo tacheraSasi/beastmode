@@ -1,13 +1,19 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  Switch,
+  Animated,
+  Platform,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { createGoal } from "@/db";
 import { View, Text, useColors } from "@/components/Themed";
+import { MaterialIcons } from "@expo/vector-icons";
+import { scheduleGoalReminder } from "@/utils/notifications";
 import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
 
@@ -49,16 +55,57 @@ export default function CreateGoalScreen() {
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("🎯");
   const [goalHours, setGoalHours] = useState("100");
+  const [reminderEnabled, setReminderEnabled] = useState(false);
+  const [reminderHour, setReminderHour] = useState(18);
+  const [reminderMinute, setReminderMinute] = useState(0);
+  const reminderAnim = useRef(new Animated.Value(0)).current;
   const c = useColors();
+
+  const toggleReminder = (value: boolean) => {
+    setReminderEnabled(value);
+    Animated.timing(reminderAnim, {
+      toValue: value ? 1 : 0,
+      duration: 250,
+      useNativeDriver: false,
+    }).start();
+  };
 
   const handleCreate = async () => {
     const trimmed = name.trim();
     if (!trimmed) return;
-    await createGoal({
+
+    const goalData: Parameters<typeof createGoal>[0] = {
       name: trimmed,
       icon,
       goalHours: Number(goalHours) || 100,
-    });
+      reminderHour: reminderEnabled ? reminderHour : null,
+      reminderMinute: reminderEnabled ? reminderMinute : null,
+    };
+
+    await createGoal(goalData);
+
+    if (reminderEnabled) {
+      // We need the goal id — get from last inserted
+      const { getAllGoals } = await import("@/db");
+      const allGoals = await getAllGoals();
+      const newGoal = allGoals[allGoals.length - 1];
+      if (newGoal) {
+        const ok = await scheduleGoalReminder(
+          newGoal.id,
+          trimmed,
+          icon,
+          reminderHour,
+          reminderMinute,
+        );
+        if (!ok) {
+          Alert.alert(
+            "Permission Required",
+            "Please enable notifications in your device settings to use reminders.",
+          );
+        }
+      }
+    }
+
     router.back();
   };
 
