@@ -21,6 +21,12 @@ export const goals = sqliteTable("goals", {
 
   goalHours: integer("goal_hours").default(100),
 
+  /** Hour (0-23) for daily reminder, null means no reminder */
+  reminderHour: integer("reminder_hour"),
+
+  /** Minute (0-59) for daily reminder */
+  reminderMinute: integer("reminder_minute"),
+
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
     () => new Date(),
   ),
