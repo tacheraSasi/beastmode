@@ -1,6 +1,5 @@
 import * as Notifications from "expo-notifications";
 
-// Configure how notifications appear when the app is in the foreground
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -48,6 +47,22 @@ export async function scheduleDailySessionReminder(hour: number = 18, minute: nu
     content: {
       title: "💪 Ready for a session?",
       body: "Put in the work start a focus session now.",
+      sound: true,
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+      hour,
+      minute,
+    },
+  });
+}
+
+/** Schedule a daily goal-specific reminder at a given hour. */
+export async function scheduleDailyGoalSpecificReminder(title: string, body: string, hour: number = 18, minute: number = 0) {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title,
+      body,
       sound: true,
     },
     trigger: {

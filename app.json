@@ -29,10 +29,16 @@
       "expo-sqlite",
       "expo-font",
       "expo-web-browser",
+      "expo-notifications",
+      "expo-file-system",
       "expo-sharing",
+      "expo-document-picker",
       "expo-image",
+      "expo-av",
+      "expo-local-authentication",
       "expo-secure-store",
-      "expo-build-properties"
+      "expo-updates",
+      "expo-build-properties",
     ],
     "experiments": {
       "typedRoutes": true
