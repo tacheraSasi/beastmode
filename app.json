@@ -2,7 +2,7 @@
   "expo": {
     "name": "beastmode",
     "slug": "beastmode",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icons/ios/AppIcon@3x.png",
     "scheme": "beastmode",
