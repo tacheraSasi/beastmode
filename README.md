@@ -1,69 +1,96 @@
-# expo-sqlite-drizzle
+# Beastmode 💪
 
-## Overview
-
-This project is a simple local-first habit tracking example app built with Expo, Expo SQLite, Drizzle, and Drizzle Kit. The app allows users to track their habits efficiently and effectively, ensuring that they can monitor their progress over time without relying on a constant internet connection.
-
-For a detailed guide on building this local-first app, check out the accompanying [Building local-first apps with Expo SQLite and Drizzle](https://israataha.com/blog/build-local-first-app-with-expo-sqlite-and-drizzle) blog post.
-
-## The Tech Stack
-
-#### Expo and Expo Router
-
-[Expo](https://expo.dev/) is a powerful framework for building cross-platform React Native applications. It simplifies the development process and provides a rich set of tools and libraries.
-
-#### Expo SQLite
-
-[Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/) is a library that allows you to access a SQLite database, enabling you to store data locally on the device. This is crucial for local-first applications, as it ensures that users can access their data anytime.
-
-#### Drizzle
-
-[Drizzle](https://orm.drizzle.team/docs/overview) is a TypeScript ORM for SQL databases that simplifies database interactions. It provides a clean and intuitive API for querying and manipulating data.
-
-#### Drizzle Kit
-
-[Drizzle Kit](https://orm.drizzle.team/docs/kit-overview) is a CLI tool for managing database migrations, making it easier to evolve your database schema over time.
+A local-first productivity app for tracking goals, focus sessions, and daily habits. Built with React Native, Expo, and SQLite — all your data stays on your device.
 
 ## Features
 
-- **Local-First**: The app stores data locally on the device using SQLite, ensuring that users can access their habit data anytime, anywhere.
-- **Habit Tracking**: Users can easily add, edit, and delete habits, as well as mark them as completed.
-- **Data Management**: Utilizes Drizzle and Drizzle Kit for data access.
+- **Goal Tracking** — Create goals with custom icons and target hours. Track progress with visual bars and percentage badges.
+- **Focus Sessions** — Start a timer, take notes, and log hours toward your goals. Persistent notification keeps you aware while a session is active.
+- **Habit Tracking** — Add daily habits, check them off, and watch your streaks grow. Weekly completion chart included.
+- **Daily Reminders** — Set per-goal daily reminders at a custom time. Global habit and session reminders available in Settings.
+- **Charts** — 7-day session hours line chart and habit completion bar chart on the home screen.
+- **Dark Mode** — System, Light, or Dark theme with persistent preference.
+- **Haptic Feedback** — Subtle vibrations on habit check-off, session start/stop, and goal creation.
+- **Session Completion Sound** — Audio chime when you finish a focus session.
+- **Fully Offline** — SQLite database with Drizzle ORM. No account, no server, no internet required.
 
-## Installation
+## Tech Stack
 
-To get started:
+| Layer         | Technology                                                                                                  |
+| ------------- | ----------------------------------------------------------------------------------------------------------- |
+| Framework     | [Expo](https://expo.dev/) (SDK 55) + [Expo Router](https://docs.expo.dev/router/introduction/)              |
+| Language      | TypeScript                                                                                                  |
+| Database      | [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/) + [Drizzle ORM](https://orm.drizzle.team/) |
+| Migrations    | [Drizzle Kit](https://orm.drizzle.team/docs/kit-overview)                                                   |
+| UI            | React Native, [@expo/vector-icons](https://icons.expo.fyi/), react-native-chart-kit                         |
+| Notifications | [expo-notifications](https://docs.expo.dev/versions/latest/sdk/notifications/)                              |
+| Audio         | [expo-audio](https://docs.expo.dev/versions/latest/sdk/audio/)                                              |
+| Haptics       | [expo-haptics](https://docs.expo.dev/versions/latest/sdk/haptics/)                                          |
+| Storage       | [AsyncStorage](https://react-native-async-storage.github.io/async-storage/) (preferences)                   |
 
-1. Clone the repository:
+## Getting Started
+
+1. **Clone the repo**
 
    ```bash
-   git clone https://github.com/israataha/expo-sqlite-drizzle.git
+   git clone https://github.com/tacheraSasi/beastmode.git
+   cd beastmode
    ```
 
-2. Navigate to the project directory:
+2. **Install dependencies**
 
    ```bash
-   cd expo-sqlite-drizzle
+   bun install
    ```
 
-3. Install the dependencies:
+3. **Generate migrations** (if schema changed)
 
    ```bash
-   npm install
+   bunx drizzle-kit generate
    ```
 
-4. Start the development server:
+4. **Start the dev server**
 
    ```bash
-   npx expo start
+   bun start
    ```
 
-5. Run on emulator or physical device
+5. **Build a dev client** (needed once for native modules)
 
-## Usage
+   ```bash
+   bunx eas build -p android --profile development
+   ```
 
-Once the app is running, you can:
+## Project Structure
 
-- Create or Delete habits from the **Settings** tab.
-- Mark habits as completed from the **Habits** tab.
-# beastmode
+```
+app/              Screen files (Expo Router file-based routing)
+  (tabs)/         Bottom tab screens: Home, Sessions, Habits, Settings
+components/       Reusable UI components (Charts, DateSelector, ScreenLayout, etc.)
+constants/        Color palette and theme tokens
+context/          React contexts (habits, theme)
+db/               Schema, migrations client, and query functions
+drizzle/          SQL migration files
+utils/            Notification helpers
+assets/           Fonts, images, icons, audio
+```
+
+## Build & Deploy
+
+```bash
+# Preview APK (internal)
+make build-apk
+
+# Production build + auto-submit
+make build-submit
+```
+
+See the [Makefile](Makefile) for all available commands.
+
+## License
+
+MIT
+
+## Author
+
+**tacheraSasi** — [GitHub](https://github.com/tacheraSasi)
