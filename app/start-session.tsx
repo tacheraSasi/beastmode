@@ -6,6 +6,11 @@ import { getGoalById, getActiveSession, startSession, endSession } from "@/db";
 import { View, Text, useColors } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
+import {
+  showActiveSessionNotification,
+  updateActiveSessionNotification,
+  dismissActiveSessionNotification,
+} from "@/utils/notifications";
 import type { Goal, Session } from "@/db";
 
 export default function StartSessionScreen() {
@@ -16,6 +21,7 @@ export default function StartSessionScreen() {
   const [elapsed, setElapsed] = useState(0);
   const [notes, setNotes] = useState("");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const notifIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const c = useColors();
 
   useFocusEffect(
@@ -38,30 +44,52 @@ export default function StartSessionScreen() {
   );
 
   useEffect(() => {
-    if (activeSession) {
+    if (activeSession && goal) {
       intervalRef.current = setInterval(() => {
         setElapsed(
           Math.floor((Date.now() - activeSession.startTime.getTime()) / 1000),
         );
       }, 1000);
+
+      // Show notification immediately for resumed sessions
+      const currentElapsed = Math.floor(
+        (Date.now() - activeSession.startTime.getTime()) / 1000,
+      );
+      showActiveSessionNotification(
+        goal.name,
+        goal.icon ?? "🎯",
+        currentElapsed,
+      );
+
+      // Update notification every 30 seconds
+      notifIntervalRef.current = setInterval(() => {
+        const secs = Math.floor(
+          (Date.now() - activeSession.startTime.getTime()) / 1000,
+        );
+        updateActiveSessionNotification(goal.name, goal.icon ?? "🎯", secs);
+      }, 30000);
     }
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      if (notifIntervalRef.current) clearInterval(notifIntervalRef.current);
     };
-  }, [activeSession]);
+  }, [activeSession, goal]);
 
   const handleStart = async () => {
-    if (!goalId) return;
+    if (!goalId || !goal) return;
     await startSession(Number(goalId), notes || undefined);
     const active = await getActiveSession(Number(goalId));
     setActiveSession(active);
     setElapsed(0);
+    // Notification is shown via the useEffect when activeSession changes
   };
 
   const handleStop = async () => {
     if (!activeSession) return;
     await endSession(activeSession.id);
     if (intervalRef.current) clearInterval(intervalRef.current);
+    if (notifIntervalRef.current) clearInterval(notifIntervalRef.current);
+    await dismissActiveSessionNotification();
     setActiveSession(null);
     router.back();
   };

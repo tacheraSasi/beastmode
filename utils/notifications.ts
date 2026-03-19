@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 
 Notifications.setNotificationHandler({
@@ -9,6 +10,17 @@ Notifications.setNotificationHandler({
     shouldShowList: true,
   }),
 });
+
+// Set up a dedicated Android channel for active session (ongoing, no sound)
+if (Platform.OS === "android") {
+  Notifications.setNotificationChannelAsync("active-session", {
+    name: "Active Session",
+    importance: Notifications.AndroidImportance.LOW,
+    sound: undefined,
+    vibrationPattern: [100],
+    lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+  });
+}
 
 /** Request permission for notifications. Returns true if granted. */
 export async function requestNotificationPermission(): Promise<boolean> {
@@ -138,4 +150,60 @@ export async function hasScheduledReminders(): Promise<{ habits: boolean; sessio
     habits: all.some((n) => n.content.title?.includes("habits")),
     sessions: all.some((n) => n.content.title?.includes("session")),
   };
+}
+
+// ─── Active Session Notification ─────────────────────────
+
+const ACTIVE_SESSION_ID = "active-session-timer";
+
+function formatElapsed(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+}
+
+/** Show a persistent notification for an active session (non-dismissible on Android). */
+export async function showActiveSessionNotification(goalName: string, goalIcon: string, elapsedSeconds: number) {
+  const granted = await requestNotificationPermission();
+  if (!granted) return;
+
+  await Notifications.scheduleNotificationAsync({
+    identifier: ACTIVE_SESSION_ID,
+    content: {
+      title: `${goalIcon} ${goalName} — Session Active`,
+      body: `⏱ ${formatElapsed(elapsedSeconds)} elapsed — keep going!`,
+      sound: false,
+      sticky: true,
+      autoDismiss: false,
+      ...(Platform.OS === "android" && {
+        channelId: "active-session",
+      }),
+    },
+    trigger: null,
+  });
+}
+
+/** Update the active session notification with the current elapsed time. */
+export async function updateActiveSessionNotification(goalName: string, goalIcon: string, elapsedSeconds: number) {
+  // Re-scheduling with the same identifier replaces the existing notification
+  await Notifications.scheduleNotificationAsync({
+    identifier: ACTIVE_SESSION_ID,
+    content: {
+      title: `${goalIcon} ${goalName} — Session Active`,
+      body: `⏱ ${formatElapsed(elapsedSeconds)} elapsed — keep going!`,
+      sound: false,
+      sticky: true,
+      autoDismiss: false,
+      ...(Platform.OS === "android" && {
+        channelId: "active-session",
+      }),
+    },
+    trigger: null,
+  });
+}
+
+/** Dismiss the active session notification. */
+export async function dismissActiveSessionNotification() {
+  await Notifications.dismissNotificationAsync(ACTIVE_SESSION_ID);
 }
