@@ -17,6 +17,7 @@ import {
 import { View, Text, useColors } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
+import { cancelGoalReminder } from "@/utils/notifications";
 import type { Goal, Session } from "@/db";
 
 export default function GoalDetailsScreen() {
@@ -54,6 +55,7 @@ export default function GoalDetailsScreen() {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
+            await cancelGoalReminder(Number(id));
             await deleteGoal(Number(id));
             router.back();
           },

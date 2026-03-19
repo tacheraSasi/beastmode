@@ -39,6 +39,7 @@
       "expo-secure-store",
       "expo-updates",
       "expo-build-properties",
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true

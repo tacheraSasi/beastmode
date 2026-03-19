@@ -170,6 +170,208 @@ export default function CreateGoalScreen() {
           ))}
         </View>
 
+        {/* Daily Reminder */}
+        <Text style={[styles.label, { color: c.textSecondary }]}>
+          Daily Reminder
+        </Text>
+        <View
+          style={[
+            styles.reminderCard,
+            { backgroundColor: c.card, borderColor: c.border },
+          ]}
+        >
+          <View
+            style={[
+              styles.reminderToggleRow,
+              { backgroundColor: "transparent" },
+            ]}
+          >
+            <MaterialIcons
+              name="notifications-active"
+              size={20}
+              color={reminderEnabled ? Colors.accent : c.textMuted}
+            />
+            <View
+              style={[styles.reminderInfo, { backgroundColor: "transparent" }]}
+            >
+              <Text style={[styles.reminderLabel, { color: c.text }]}>
+                Set a daily reminder
+              </Text>
+              <Text style={[styles.reminderSub, { color: c.textMuted }]}>
+                Get notified to work on this goal
+              </Text>
+            </View>
+            <Switch
+              value={reminderEnabled}
+              onValueChange={toggleReminder}
+              trackColor={{ false: c.border, true: Colors.accentLight }}
+              thumbColor={reminderEnabled ? Colors.accent : c.textMuted}
+            />
+          </View>
+          <Animated.View
+            style={{
+              maxHeight: reminderAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 200],
+              }),
+              opacity: reminderAnim,
+              overflow: "hidden",
+            }}
+          >
+            <View
+              style={[styles.timePickerDivider, { backgroundColor: c.border }]}
+            />
+            <View
+              style={[styles.timePickerRow, { backgroundColor: "transparent" }]}
+            >
+              <MaterialIcons name="schedule" size={18} color={c.textMuted} />
+              <Text
+                style={[styles.timePickerLabel, { color: c.textSecondary }]}
+              >
+                Reminder time
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.timePickerWrap,
+                { backgroundColor: "transparent" },
+              ]}
+            >
+              {/* Hour Picker */}
+              <View
+                style={[styles.timeColumn, { backgroundColor: "transparent" }]}
+              >
+                <TouchableOpacity
+                  onPress={() => setReminderHour((h) => (h + 1) % 24)}
+                  style={[styles.timeArrow, { backgroundColor: c.surfaceAlt }]}
+                  activeOpacity={0.6}
+                >
+                  <MaterialIcons
+                    name="keyboard-arrow-up"
+                    size={22}
+                    color={c.text}
+                  />
+                </TouchableOpacity>
+                <View
+                  style={[
+                    styles.timeDisplay,
+                    {
+                      backgroundColor: c.surfaceAlt,
+                      borderColor: Colors.accent,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.timeValue, { color: c.text }]}>
+                    {String(reminderHour).padStart(2, "0")}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => setReminderHour((h) => (h - 1 + 24) % 24)}
+                  style={[styles.timeArrow, { backgroundColor: c.surfaceAlt }]}
+                  activeOpacity={0.6}
+                >
+                  <MaterialIcons
+                    name="keyboard-arrow-down"
+                    size={22}
+                    color={c.text}
+                  />
+                </TouchableOpacity>
+                <Text style={[styles.timeUnit, { color: c.textMuted }]}>
+                  hour
+                </Text>
+              </View>
+
+              <Text style={[styles.timeSeparator, { color: c.text }]}>:</Text>
+
+              {/* Minute Picker */}
+              <View
+                style={[styles.timeColumn, { backgroundColor: "transparent" }]}
+              >
+                <TouchableOpacity
+                  onPress={() => setReminderMinute((m) => (m + 5) % 60)}
+                  style={[styles.timeArrow, { backgroundColor: c.surfaceAlt }]}
+                  activeOpacity={0.6}
+                >
+                  <MaterialIcons
+                    name="keyboard-arrow-up"
+                    size={22}
+                    color={c.text}
+                  />
+                </TouchableOpacity>
+                <View
+                  style={[
+                    styles.timeDisplay,
+                    {
+                      backgroundColor: c.surfaceAlt,
+                      borderColor: Colors.accent,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.timeValue, { color: c.text }]}>
+                    {String(reminderMinute).padStart(2, "0")}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => setReminderMinute((m) => (m - 5 + 60) % 60)}
+                  style={[styles.timeArrow, { backgroundColor: c.surfaceAlt }]}
+                  activeOpacity={0.6}
+                >
+                  <MaterialIcons
+                    name="keyboard-arrow-down"
+                    size={22}
+                    color={c.text}
+                  />
+                </TouchableOpacity>
+                <Text style={[styles.timeUnit, { color: c.textMuted }]}>
+                  min
+                </Text>
+              </View>
+
+              {/* AM/PM indicator */}
+              <View
+                style={[styles.ampmWrap, { backgroundColor: "transparent" }]}
+              >
+                <View
+                  style={[
+                    styles.ampmBadge,
+                    {
+                      backgroundColor:
+                        reminderHour < 12 ? Colors.accent : c.surfaceAlt,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.ampmText,
+                      { color: reminderHour < 12 ? "#fff" : c.textMuted },
+                    ]}
+                  >
+                    AM
+                  </Text>
+                </View>
+                <View
+                  style={[
+                    styles.ampmBadge,
+                    {
+                      backgroundColor:
+                        reminderHour >= 12 ? Colors.accent : c.surfaceAlt,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.ampmText,
+                      { color: reminderHour >= 12 ? "#fff" : c.textMuted },
+                    ]}
+                  >
+                    PM
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </Animated.View>
+        </View>
+
         <TouchableOpacity
           style={[
             styles.createBtn,
@@ -228,4 +430,63 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   createBtnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
+  reminderCard: {
+    borderRadius: 14,
+    borderWidth: 1,
+    overflow: "hidden",
+    marginBottom: 4,
+  },
+  reminderToggleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+  },
+  reminderInfo: { flex: 1, marginLeft: 12 },
+  reminderLabel: { fontSize: 15, fontWeight: "600" },
+  reminderSub: { fontSize: 12, marginTop: 2 },
+  timePickerDivider: { height: 1 },
+  timePickerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    gap: 6,
+  },
+  timePickerLabel: { fontSize: 13, fontWeight: "600" },
+  timePickerWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  timeColumn: { alignItems: "center", gap: 4 },
+  timeArrow: {
+    width: 40,
+    height: 32,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  timeDisplay: {
+    width: 64,
+    height: 56,
+    borderRadius: 14,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  timeValue: { fontSize: 28, fontWeight: "800", letterSpacing: 1 },
+  timeUnit: { fontSize: 11, fontWeight: "600", marginTop: 2 },
+  timeSeparator: { fontSize: 28, fontWeight: "800", marginBottom: 24 },
+  ampmWrap: { marginLeft: 8, gap: 6, marginBottom: 20 },
+  ampmBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  ampmText: { fontSize: 13, fontWeight: "700" },
 });
