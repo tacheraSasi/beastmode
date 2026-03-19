@@ -2,10 +2,14 @@ import {
   createContext,
   useContext,
   useState,
+  useEffect,
   useCallback,
   type ReactNode,
 } from "react";
 import { useColorScheme as useSystemColorScheme } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const THEME_KEY = "beastmode_theme_mode";
 
 type ThemeMode = "system" | "light" | "dark";
 type ResolvedTheme = "light" | "dark";
@@ -26,6 +30,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const systemScheme = useSystemColorScheme();
   const [mode, setModeState] = useState<ThemeMode>("system");
 
+  useEffect(() => {
+    AsyncStorage.getItem(THEME_KEY).then((saved) => {
+      if (saved === "system" || saved === "light" || saved === "dark") {
+        setModeState(saved);
+      }
+    });
+  }, []);
+
   const sysValue =
     systemScheme === "light" || systemScheme === "dark"
       ? systemScheme
@@ -34,6 +46,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const setMode = useCallback((m: ThemeMode) => {
     setModeState(m);
+    AsyncStorage.setItem(THEME_KEY, m);
   }, []);
 
   return (

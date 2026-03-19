@@ -14,6 +14,7 @@ import { createGoal } from "@/db";
 import { View, Text, useColors } from "@/components/Themed";
 import { MaterialIcons } from "@expo/vector-icons";
 import { scheduleGoalReminder } from "@/utils/notifications";
+import * as Haptics from "expo-haptics";
 import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
 
@@ -73,6 +74,7 @@ export default function CreateGoalScreen() {
   const handleCreate = async () => {
     const trimmed = name.trim();
     if (!trimmed) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     const goalData: Parameters<typeof createGoal>[0] = {
       name: trimmed,

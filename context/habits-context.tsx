@@ -3,6 +3,7 @@ import { db } from "../db";
 import { habits, logs, Habit } from "@/db";
 import { getAllHabitStreaks } from "@/db";
 import { eq, and } from "drizzle-orm";
+import * as Haptics from "expo-haptics";
 
 type DailyLog = Habit & { completed: boolean };
 
@@ -112,11 +113,13 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
         await db
           .delete(logs)
           .where(and(eq(logs.habit_id, id), eq(logs.date, dateString)));
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       } else {
         await db.insert(logs).values({
           habit_id: id,
           date: dateString,
         });
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
 
       loadDailyHabits(selectedDate);

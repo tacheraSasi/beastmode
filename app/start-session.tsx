@@ -6,12 +6,16 @@ import { getGoalById, getActiveSession, startSession, endSession } from "@/db";
 import { View, Text, useColors } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
+import * as Haptics from "expo-haptics";
+import { useAudioPlayer } from "expo-audio";
 import {
   showActiveSessionNotification,
   updateActiveSessionNotification,
   dismissActiveSessionNotification,
 } from "@/utils/notifications";
 import type { Goal, Session } from "@/db";
+
+const alertSound = require("@/assets/alert.mp3");
 
 export default function StartSessionScreen() {
   const { goalId } = useLocalSearchParams<{ goalId: string }>();
@@ -22,6 +26,7 @@ export default function StartSessionScreen() {
   const [notes, setNotes] = useState("");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const notifIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const player = useAudioPlayer(alertSound);
   const c = useColors();
 
   useFocusEffect(
@@ -77,6 +82,7 @@ export default function StartSessionScreen() {
 
   const handleStart = async () => {
     if (!goalId || !goal) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await startSession(Number(goalId), notes || undefined);
     const active = await getActiveSession(Number(goalId));
     setActiveSession(active);
@@ -86,6 +92,9 @@ export default function StartSessionScreen() {
 
   const handleStop = async () => {
     if (!activeSession) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    player.seekTo(0);
+    player.play();
     await endSession(activeSession.id);
     if (intervalRef.current) clearInterval(intervalRef.current);
     if (notifIntervalRef.current) clearInterval(notifIntervalRef.current);

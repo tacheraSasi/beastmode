@@ -16,6 +16,7 @@ import {
   scheduleGoalReminder,
   cancelGoalReminder,
 } from "@/utils/notifications";
+import * as Haptics from "expo-haptics";
 import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
 
@@ -94,6 +95,7 @@ export default function EditGoalScreen() {
   const handleSave = async () => {
     const trimmed = name.trim();
     if (!trimmed || !id) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     const goalId = Number(id);
 
     await updateGoal(goalId, {
