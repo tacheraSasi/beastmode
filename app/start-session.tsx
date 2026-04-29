@@ -2,10 +2,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { TouchableOpacity, TextInput, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
-import { getGoalById, getActiveSession, startSession, endSession } from "@/db";
+import { getGoalById, getActiveSession, startSession, endSession, recordPomodoroSession } from "@/db";
 import { View, Text, useColors } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
+import PomodoroTimer from "@/components/PomodoroTimer";
 import * as Haptics from "expo-haptics";
 import { useAudioPlayer } from "expo-audio";
 import {
@@ -17,6 +18,8 @@ import type { Goal, Session } from "@/db";
 
 const alertSound = require("@/assets/alert.mp3");
 
+type SessionMode = "stopwatch" | "pomodoro";
+
 export default function StartSessionScreen() {
   const { goalId } = useLocalSearchParams<{ goalId: string }>();
   const router = useRouter();
@@ -24,6 +27,7 @@ export default function StartSessionScreen() {
   const [activeSession, setActiveSession] = useState<Session | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [notes, setNotes] = useState("");
+  const [sessionMode, setSessionMode] = useState<SessionMode>("stopwatch");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const notifIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const player = useAudioPlayer(alertSound);
@@ -110,6 +114,21 @@ export default function StartSessionScreen() {
     return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
+  /** Records the completed Pomodoro session with actual work duration. */
+  const handlePomodoroComplete = async (
+    totalWorkSeconds: number,
+    completedPomodoros: number,
+  ) => {
+    if (!goalId || !goal) return;
+    await recordPomodoroSession(
+      Number(goalId),
+      totalWorkSeconds,
+      `🍅 Pomodoro: ${completedPomodoros} session${completedPomodoros !== 1 ? "s" : ""} completed`,
+    );
+    await dismissActiveSessionNotification();
+    router.back();
+  };
+
   if (!goal) {
     return (
       <ScreenLayout fullScreen>
@@ -125,82 +144,181 @@ export default function StartSessionScreen() {
   return (
     <ScreenLayout fullScreen>
       <View style={styles.container}>
-        {/* Goal info */}
-        <View style={[styles.goalInfo, { backgroundColor: "transparent" }]}>
-          <View style={[styles.iconWrap, { backgroundColor: c.surfaceAlt }]}>
-            <Text style={styles.icon}>{goal.icon ?? "🎯"}</Text>
-          </View>
-          <Text style={[styles.goalName, { color: c.text }]}>{goal.name}</Text>
-        </View>
-
-        {/* Timer */}
-        <View
-          style={[styles.timerContainer, { backgroundColor: "transparent" }]}
-        >
-          <View
-            style={[
-              styles.timerRing,
-              {
-                borderColor: activeSession ? Colors.accent : c.surfaceAlt,
-              },
-            ]}
-          >
-            <Text style={[styles.timerText, { color: c.text }]}>
-              {formatTime(elapsed)}
-            </Text>
-            {activeSession && (
-              <Text style={[styles.startedAt, { color: c.textMuted }]}>
-                started{" "}
-                {activeSession.startTime.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </Text>
-            )}
-          </View>
-        </View>
-
-        {/* Notes */}
+        {/* Mode toggle - only show when no active stopwatch session */}
         {!activeSession && (
-          <TextInput
-            style={[
-              styles.notesInput,
-              {
-                backgroundColor: c.surfaceAlt,
-                borderColor: c.border,
-                color: c.text,
-              },
-            ]}
-            placeholder="Session notes (optional)"
-            placeholderTextColor={c.textMuted}
-            value={notes}
-            onChangeText={setNotes}
-            multiline
-          />
+          <View
+            style={[styles.modeToggle, { backgroundColor: c.surfaceAlt }]}
+          >
+            <TouchableOpacity
+              style={[
+                styles.modeBtn,
+                sessionMode === "stopwatch" && {
+                  backgroundColor: Colors.accent,
+                },
+              ]}
+              onPress={() => setSessionMode("stopwatch")}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons
+                name="timer"
+                size={18}
+                color={sessionMode === "stopwatch" ? "#fff" : c.textMuted}
+              />
+              <Text
+                style={[
+                  styles.modeBtnText,
+                  {
+                    color:
+                      sessionMode === "stopwatch" ? "#fff" : c.textMuted,
+                  },
+                ]}
+              >
+                Stopwatch
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.modeBtn,
+                sessionMode === "pomodoro" && {
+                  backgroundColor: Colors.accent,
+                },
+              ]}
+              onPress={() => setSessionMode("pomodoro")}
+              activeOpacity={0.7}
+            >
+              <Text
+                style={[
+                  styles.modeEmoji,
+                  {
+                    color:
+                      sessionMode === "pomodoro" ? "#fff" : c.textMuted,
+                  },
+                ]}
+              >
+                🍅
+              </Text>
+              <Text
+                style={[
+                  styles.modeBtnText,
+                  {
+                    color:
+                      sessionMode === "pomodoro" ? "#fff" : c.textMuted,
+                  },
+                ]}
+              >
+                Pomodoro
+              </Text>
+            </TouchableOpacity>
+          </View>
         )}
 
-        {/* Controls */}
-        <View style={[styles.controls, { backgroundColor: "transparent" }]}>
-          {activeSession ? (
-            <TouchableOpacity
-              style={[styles.stopBtn, { backgroundColor: c.danger }]}
-              onPress={handleStop}
-              activeOpacity={0.8}
+        {/* Pomodoro mode */}
+        {sessionMode === "pomodoro" && !activeSession ? (
+          <PomodoroTimer
+            goalName={goal.name}
+            goalIcon={goal.icon ?? "🎯"}
+            onSessionComplete={handlePomodoroComplete}
+          />
+        ) : (
+          <>
+            {/* Goal info */}
+            <View
+              style={[styles.goalInfo, { backgroundColor: "transparent" }]}
             >
-              <MaterialIcons name="stop" size={28} color="#fff" />
-              <Text style={styles.btnText}>Stop Session</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={[styles.startBtn, { backgroundColor: Colors.accent }]}
-              onPress={handleStart}
-              activeOpacity={0.8}
+              <View
+                style={[styles.iconWrap, { backgroundColor: c.surfaceAlt }]}
+              >
+                <Text style={styles.icon}>{goal.icon ?? "🎯"}</Text>
+              </View>
+              <Text style={[styles.goalName, { color: c.text }]}>
+                {goal.name}
+              </Text>
+            </View>
+
+            {/* Timer */}
+            <View
+              style={[
+                styles.timerContainer,
+                { backgroundColor: "transparent" },
+              ]}
             >
-              <MaterialIcons name="play-arrow" size={28} color="#fff" />
-              <Text style={styles.btnText}>Start Session</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+              <View
+                style={[
+                  styles.timerRing,
+                  {
+                    borderColor: activeSession
+                      ? Colors.accent
+                      : c.surfaceAlt,
+                  },
+                ]}
+              >
+                <Text style={[styles.timerText, { color: c.text }]}>
+                  {formatTime(elapsed)}
+                </Text>
+                {activeSession && (
+                  <Text style={[styles.startedAt, { color: c.textMuted }]}>
+                    started{" "}
+                    {activeSession.startTime.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            {/* Notes */}
+            {!activeSession && (
+              <TextInput
+                style={[
+                  styles.notesInput,
+                  {
+                    backgroundColor: c.surfaceAlt,
+                    borderColor: c.border,
+                    color: c.text,
+                  },
+                ]}
+                placeholder="Session notes (optional)"
+                placeholderTextColor={c.textMuted}
+                value={notes}
+                onChangeText={setNotes}
+                multiline
+              />
+            )}
+
+            {/* Controls */}
+            <View
+              style={[styles.controls, { backgroundColor: "transparent" }]}
+            >
+              {activeSession ? (
+                <TouchableOpacity
+                  style={[styles.stopBtn, { backgroundColor: c.danger }]}
+                  onPress={handleStop}
+                  activeOpacity={0.8}
+                >
+                  <MaterialIcons name="stop" size={28} color="#fff" />
+                  <Text style={styles.btnText}>Stop Session</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={[
+                    styles.startBtn,
+                    { backgroundColor: Colors.accent },
+                  ]}
+                  onPress={handleStart}
+                  activeOpacity={0.8}
+                >
+                  <MaterialIcons
+                    name="play-arrow"
+                    size={28}
+                    color="#fff"
+                  />
+                  <Text style={styles.btnText}>Start Session</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </>
+        )}
       </View>
     </ScreenLayout>
   );
@@ -209,6 +327,23 @@ export default function StartSessionScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 20, paddingTop: 16 },
   loadingText: { textAlign: "center", marginTop: 40 },
+  modeToggle: {
+    flexDirection: "row",
+    borderRadius: 14,
+    padding: 4,
+    marginBottom: 8,
+  },
+  modeBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    borderRadius: 10,
+    gap: 6,
+  },
+  modeBtnText: { fontSize: 14, fontWeight: "700" },
+  modeEmoji: { fontSize: 16 },
   goalInfo: { alignItems: "center", marginTop: 10 },
   iconWrap: {
     width: 64,
