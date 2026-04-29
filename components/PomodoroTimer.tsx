@@ -109,16 +109,18 @@ export default function PomodoroTimer({
     }
   }, [isRunning, phase, pulseAnim]);
 
+  // Track when timer reaches zero
+  const [phaseCompleted, setPhaseCompleted] = useState(false);
+
   // Timer countdown
   useEffect(() => {
     if (isRunning) {
       intervalRef.current = setInterval(() => {
         setRemainingSeconds((prev) => {
           if (prev <= 1) {
-            handlePhaseComplete();
+            setPhaseCompleted(true);
             return 0;
           }
-          // Track work time
           if (phase === "work") {
             setTotalWorkSeconds((t) => t + 1);
           }
@@ -131,11 +133,14 @@ export default function PomodoroTimer({
     };
   }, [isRunning, phase]);
 
-  const handlePhaseComplete = () => {
+  // Handle phase completion in a separate effect
+  useEffect(() => {
+    if (!phaseCompleted) return;
+    setPhaseCompleted(false);
+
     if (intervalRef.current) clearInterval(intervalRef.current);
     setIsRunning(false);
 
-    // Play alert sound and haptic
     player.seekTo(0);
     player.play();
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -144,7 +149,6 @@ export default function PomodoroTimer({
       const newCompleted = completedPomodoros + 1;
       setCompletedPomodoros(newCompleted);
 
-      // Determine next break type
       const isLongBreak =
         newCompleted % settings.sessionsBeforeLongBreak === 0;
       const nextPhase: PomodoroPhase = isLongBreak
@@ -158,7 +162,6 @@ export default function PomodoroTimer({
         setIsRunning(true);
       }
     } else {
-      // Break is over, start work
       setPhase("work");
       setRemainingSeconds(getPhaseDuration("work"));
       onPhaseChange?.("work");
@@ -167,7 +170,7 @@ export default function PomodoroTimer({
         setIsRunning(true);
       }
     }
-  };
+  }, [phaseCompleted]);
 
   const handleStartPause = () => {
     if (isRunning) {
@@ -192,7 +195,7 @@ export default function PomodoroTimer({
 
   const handleSkipPhase = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    handlePhaseComplete();
+    setPhaseCompleted(true);
   };
 
   const handleFinishSession = () => {
@@ -239,6 +242,13 @@ export default function PomodoroTimer({
       case "longBreak":
         return "🌿 Long Break";
     }
+  };
+
+  const isDotFilled = (index: number) => {
+    const cyclePosition = completedPomodoros % settings.sessionsBeforeLongBreak;
+    // If we just completed a full cycle, all dots are filled
+    if (completedPomodoros > 0 && cyclePosition === 0) return true;
+    return index < cyclePosition;
   };
 
   const progress =
@@ -311,14 +321,9 @@ export default function PomodoroTimer({
               style={[
                 styles.counterDot,
                 {
-                  backgroundColor:
-                    i < completedPomodoros % settings.sessionsBeforeLongBreak ||
-                    (completedPomodoros > 0 &&
-                      completedPomodoros % settings.sessionsBeforeLongBreak ===
-                        0 &&
-                      i < settings.sessionsBeforeLongBreak)
-                      ? Colors.accent
-                      : c.surfaceAlt,
+                  backgroundColor: isDotFilled(i)
+                    ? Colors.accent
+                    : c.surfaceAlt,
                 },
               ]}
             />

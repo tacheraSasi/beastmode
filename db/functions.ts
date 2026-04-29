@@ -143,6 +143,28 @@ export async function endSession(sessionId: number) {
   return { endTime, durationSeconds };
 }
 
+/** Record a completed Pomodoro session with actual work duration. */
+export async function recordPomodoroSession(
+  goalId: number,
+  durationSeconds: number,
+  notes?: string,
+) {
+  const endTime = new Date();
+  const startTime = new Date(endTime.getTime() - durationSeconds * 1000);
+
+  const result = await db
+    .insert(sessions)
+    .values({ goalId, startTime, endTime, durationSeconds, notes })
+    .returning();
+
+  // Update daily stats
+  const dateStart = new Date(startTime);
+  dateStart.setHours(0, 0, 0, 0);
+  await upsertDailyStats(goalId, dateStart, durationSeconds);
+
+  return result[0] ?? null;
+}
+
 export async function getActiveSession(goalId?: number) {
   const condition = goalId
     ? and(isNull(sessions.endTime), eq(sessions.goalId, goalId))

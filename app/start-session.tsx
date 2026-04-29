@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { TouchableOpacity, TextInput, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
-import { getGoalById, getActiveSession, startSession, endSession } from "@/db";
+import { getGoalById, getActiveSession, startSession, endSession, recordPomodoroSession } from "@/db";
 import { View, Text, useColors } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
@@ -114,20 +114,17 @@ export default function StartSessionScreen() {
     return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
+  /** Records the completed Pomodoro session with actual work duration. */
   const handlePomodoroComplete = async (
     totalWorkSeconds: number,
     completedPomodoros: number,
   ) => {
     if (!goalId || !goal) return;
-    // Start and immediately end a session to record the pomodoro work
-    await startSession(
+    await recordPomodoroSession(
       Number(goalId),
+      totalWorkSeconds,
       `🍅 Pomodoro: ${completedPomodoros} session${completedPomodoros !== 1 ? "s" : ""} completed`,
     );
-    const active = await getActiveSession(Number(goalId));
-    if (active) {
-      await endSession(active.id);
-    }
     await dismissActiveSessionNotification();
     router.back();
   };
