@@ -86,11 +86,3 @@ make build-submit
 ```
 
 See the [Makefile](Makefile) for all available commands.
-
-## License
-
-MIT
-
-## Author
-
-**tacheraSasi** — [GitHub](https://github.com/tacheraSasi)
