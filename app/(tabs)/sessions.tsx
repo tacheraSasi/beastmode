@@ -2,11 +2,12 @@ import { useCallback, useState } from "react";
 import { FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter, useFocusEffect, type Href } from "expo-router";
-import { getAllGoals, getActiveSession, getSessionsByGoal } from "@/db";
+import { getActiveSession, getGoalsForMonth, getSessionsByGoal } from "@/db";
 import { View, Text, useColors } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
 import type { Goal, Session } from "@/db";
+import { getMonthKey } from "@/utils/month";
 
 type GoalWithSession = Goal & {
   activeSession: Session | null;
@@ -21,7 +22,8 @@ export default function SessionsScreen() {
   useFocusEffect(
     useCallback(() => {
       (async () => {
-        const allGoals = await getAllGoals();
+        const monthKey = getMonthKey(new Date());
+        const allGoals = await getGoalsForMonth(monthKey);
         const withSessions = await Promise.all(
           allGoals.map(async (g) => {
             const active = await getActiveSession(g.id);

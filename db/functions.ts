@@ -1,4 +1,4 @@
-import { and, between, desc, eq, isNull, sql, sum } from "drizzle-orm";
+import { and, between, desc, eq, isNull, or, sql, sum } from "drizzle-orm";
 import { db } from "./client";
 import {
   dailyStats,
@@ -9,6 +9,7 @@ import {
   type Goal,
   type Session,
 } from "./schema";
+import { getMonthDateRange, type MonthKey } from "@/utils/month";
 
 // ─── Habits ──────────────────────────────────────────────
 
@@ -54,6 +55,22 @@ export async function getAllGoals() {
   return db.select().from(goals);
 }
 
+export async function getGoalsForMonth(monthKey: MonthKey) {
+  return db
+    .select()
+    .from(goals)
+    .where(
+      or(eq(goals.timeframe, "all_time"), eq(goals.monthKey, monthKey)),
+    );
+}
+
+export async function getMonthlyGoalsForMonth(monthKey: MonthKey) {
+  return db
+    .select()
+    .from(goals)
+    .where(and(eq(goals.timeframe, "monthly"), eq(goals.monthKey, monthKey)));
+}
+
 export async function getGoalById(id: number) {
   const rows = await db.select().from(goals).where(eq(goals.id, id));
   return rows[0] ?? null;
@@ -63,6 +80,8 @@ export async function createGoal(data: {
   name: string;
   icon?: string;
   goalHours?: number;
+  timeframe?: Goal["timeframe"];
+  monthKey?: MonthKey | null;
   reminderHour?: number | null;
   reminderMinute?: number | null;
 }) {
@@ -70,6 +89,8 @@ export async function createGoal(data: {
     name: data.name,
     icon: data.icon,
     goalHours: data.goalHours ?? 100,
+    timeframe: data.timeframe ?? "all_time",
+    monthKey: data.monthKey ?? null,
     reminderHour: data.reminderHour ?? null,
     reminderMinute: data.reminderMinute ?? null,
   });
@@ -77,7 +98,18 @@ export async function createGoal(data: {
 
 export async function updateGoal(
   id: number,
-  data: Partial<Pick<Goal, "name" | "icon" | "goalHours" | "reminderHour" | "reminderMinute">>,
+  data: Partial<
+    Pick<
+      Goal,
+      | "name"
+      | "icon"
+      | "goalHours"
+      | "timeframe"
+      | "monthKey"
+      | "reminderHour"
+      | "reminderMinute"
+    >
+  >,
 ) {
   return db
     .update(goals)
@@ -104,6 +136,38 @@ export async function getGoalProgress(goalId: number) {
     totalSeconds,
     totalHours: totalSeconds / 3600,
   };
+}
+
+export async function getGoalTotalsForDateRange(
+  goalId: number,
+  startDate: Date,
+  endDate: Date,
+) {
+  const result = await db
+    .select({
+      totalSeconds: sum(dailyStats.durationSeconds),
+      totalSessions: sum(dailyStats.sessionCount),
+    })
+    .from(dailyStats)
+    .where(
+      and(
+        eq(dailyStats.goalId, goalId),
+        between(dailyStats.date, startDate, endDate),
+      ),
+    );
+
+  const totalSeconds = Number(result[0]?.totalSeconds ?? 0);
+  const totalSessions = Number(result[0]?.totalSessions ?? 0);
+  return {
+    totalSeconds,
+    totalHours: totalSeconds / 3600,
+    totalSessions,
+  };
+}
+
+export async function getGoalTotalsForMonth(goalId: number, monthKey: MonthKey) {
+  const { start, end } = getMonthDateRange(monthKey);
+  return getGoalTotalsForDateRange(goalId, start, end);
 }
 
 // ─── Sessions ────────────────────────────────────────────
@@ -179,6 +243,23 @@ export async function getSessionsByGoal(goalId: number) {
     .select()
     .from(sessions)
     .where(eq(sessions.goalId, goalId))
+    .orderBy(desc(sessions.startTime));
+}
+
+export async function getSessionsByGoalInRange(
+  goalId: number,
+  startDate: Date,
+  endDate: Date,
+) {
+  return db
+    .select()
+    .from(sessions)
+    .where(
+      and(
+        eq(sessions.goalId, goalId),
+        between(sessions.startTime, startDate, endDate),
+      ),
+    )
     .orderBy(desc(sessions.startTime));
 }
 
