@@ -10,6 +10,7 @@ import {
 import {
   getGoalById,
   getGoalProgress,
+  getGoalTotalsForMonth,
   getSessionsByGoal,
   deleteGoal,
   getActiveSession,
@@ -19,6 +20,7 @@ import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
 import { cancelGoalReminder } from "@/utils/notifications";
 import type { Goal, Session } from "@/db";
+import { getMonthKey, monthKeyToDate, type MonthKey } from "@/utils/month";
 
 export default function GoalDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -37,7 +39,16 @@ export default function GoalDetailsScreen() {
         const g = await getGoalById(goalId);
         if (!g) return;
         setGoal(g);
-        setProgress(await getGoalProgress(goalId));
+        if (g.timeframe === "monthly") {
+          const currentMonth = getMonthKey(new Date());
+          const totals = await getGoalTotalsForMonth(
+            goalId,
+            (g.monthKey ?? currentMonth) as MonthKey,
+          );
+          setProgress({ totalHours: totals.totalHours, totalSeconds: totals.totalSeconds });
+        } else {
+          setProgress(await getGoalProgress(goalId));
+        }
         const sessions = await getSessionsByGoal(goalId);
         setRecentSessions(sessions.slice(0, 5));
         setActiveSession(await getActiveSession(goalId));
@@ -87,6 +98,17 @@ export default function GoalDetailsScreen() {
     100,
     Math.round((progress.totalHours / (goal.goalHours ?? 100)) * 100),
   );
+  const currentMonthKey = getMonthKey(new Date());
+  const isMonthly = goal.timeframe === "monthly";
+  const monthLabel =
+    isMonthly && goal.monthKey
+      ? monthKeyToDate(goal.monthKey as MonthKey).toLocaleString("en-US", {
+          month: "long",
+          year: "numeric",
+        })
+      : null;
+  const isArchivedMonthly =
+    isMonthly && goal.monthKey != null && goal.monthKey !== currentMonthKey;
 
   return (
     <ScreenLayout fullScreen>
@@ -99,6 +121,7 @@ export default function GoalDetailsScreen() {
           <Text style={styles.heroIcon}>{goal.icon ?? "🎯"}</Text>
           <Text style={styles.heroName}>{goal.name}</Text>
           <Text style={styles.heroHours}>
+            {monthLabel ? `${monthLabel} · ` : ""}
             {progress.totalHours.toFixed(1)}h of {goal.goalHours ?? 100}h
           </Text>
           <View style={styles.heroProgressBg}>
@@ -127,6 +150,23 @@ export default function GoalDetailsScreen() {
               </View>
               <Text style={styles.primaryBtnText}>Resume Session</Text>
             </TouchableOpacity>
+          ) : isArchivedMonthly ? (
+            <View
+              style={[
+                styles.primaryBtn,
+                {
+                  backgroundColor: c.card,
+                  borderColor: c.border,
+                  borderWidth: 1,
+                  opacity: 0.75,
+                },
+              ]}
+            >
+              <MaterialIcons name="lock" size={20} color={c.textMuted} />
+              <Text style={[styles.primaryBtnText, { color: c.textMuted }]}>
+                Archived Month
+              </Text>
+            </View>
           ) : (
             <TouchableOpacity
               style={[styles.primaryBtn, { backgroundColor: Colors.accent }]}
@@ -192,6 +232,32 @@ export default function GoalDetailsScreen() {
             </TouchableOpacity>
           </View>
         </View>
+
+        {isMonthly ? (
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: "/monthly-report",
+                params: { goalId: goal.id, monthKey: goal.monthKey ?? currentMonthKey },
+              } as Href)
+            }
+            activeOpacity={0.7}
+            style={[
+              styles.reportCard,
+              { backgroundColor: c.card, borderColor: c.border },
+            ]}
+          >
+            <View style={{ flex: 1, backgroundColor: "transparent" }}>
+              <Text style={[styles.reportTitle, { color: c.text }]}>
+                Monthly Report
+              </Text>
+              <Text style={[styles.reportSub, { color: c.textSecondary }]}>
+                View end-of-month summary and sessions
+              </Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={26} color={Colors.accent} />
+          </TouchableOpacity>
+        ) : null}
 
         {/* Recent Sessions */}
         {recentSessions.length > 0 && (
@@ -313,6 +379,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   outlineBtnText: { fontWeight: "600", marginLeft: 6 },
+  reportCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 24,
+  },
+  reportTitle: { fontSize: 16, fontWeight: "800" },
+  reportSub: { fontSize: 13, marginTop: 3 },
   section: { marginBottom: 24 },
   sectionTitle: { fontSize: 18, fontWeight: "700", marginBottom: 12 },
   sessionRow: {

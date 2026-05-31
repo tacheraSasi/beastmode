@@ -112,6 +112,10 @@ function RootLayoutNav() {
             name="edit-goal"
             options={{ title: "Edit Goal", presentation: "modal" }}
           />
+          <Stack.Screen
+            name="monthly-report"
+            options={{ title: "Monthly Report" }}
+          />
           <Stack.Screen name="modal" options={{ presentation: "modal" }} />
         </Stack>
       </HabitsProvider>

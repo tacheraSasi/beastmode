@@ -3,8 +3,9 @@ import { ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter, useFocusEffect, type Href } from "expo-router";
 import {
-  getAllGoals,
   getGoalProgress,
+  getGoalsForMonth,
+  getGoalTotalsForMonth,
   getStatsForDateRange,
   getTotalSessionHistory,
 } from "@/db";
@@ -14,6 +15,7 @@ import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
 import { useHabits } from "@/context/habits-context";
 import type { Goal } from "@/db";
+import { getMonthKey, monthKeyToDate, type MonthKey } from "@/utils/month";
 
 type GoalWithProgress = Goal & {
   totalHours: number;
@@ -33,7 +35,8 @@ export default function HomeScreen() {
   const bestStreak = Math.max(0, ...Object.values(streaks));
 
   const loadGoals = useCallback(async () => {
-    const allGoals = await getAllGoals();
+    const monthKey = getMonthKey(new Date());
+    const allGoals = await getGoalsForMonth(monthKey);
     const now = new Date();
     const weekAgo = new Date();
     weekAgo.setDate(now.getDate() - 7);
@@ -42,7 +45,13 @@ export default function HomeScreen() {
     let total = 0;
     const withProgress = await Promise.all(
       allGoals.map(async (g) => {
-        const progress = await getGoalProgress(g.id);
+        const progress =
+          g.timeframe === "monthly"
+            ? await getGoalTotalsForMonth(
+                g.id,
+                (g.monthKey ?? monthKey) as MonthKey,
+              )
+            : await getGoalProgress(g.id);
         const weekStats = await getStatsForDateRange(g.id, weekAgo, now);
         const weekSeconds = weekStats.reduce(
           (sum, s) => sum + s.durationSeconds,
@@ -271,12 +280,25 @@ export default function HomeScreen() {
           <Text style={[styles.sectionTitle, { color: c.text }]}>
             Your Goals
           </Text>
-          <TouchableOpacity
-            onPress={() => router.push("/create-goal" as Href)}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.seeAll, { color: Colors.accent }]}>+ New</Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: "row", backgroundColor: "transparent" }}>
+            <TouchableOpacity
+              onPress={() => router.push("/monthly-report" as Href)}
+              activeOpacity={0.7}
+              style={{ marginRight: 14 }}
+            >
+              <Text style={[styles.seeAll, { color: Colors.accent }]}>
+                Report
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push("/create-goal" as Href)}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.seeAll, { color: Colors.accent }]}>
+                + New
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {goals.length === 0 ? (
@@ -331,11 +353,34 @@ export default function HomeScreen() {
                 <View
                   style={[styles.goalInfo, { backgroundColor: "transparent" }]}
                 >
-                  <Text style={[styles.goalName, { color: c.text }]}>
-                    {item.name}
-                  </Text>
+                  <View
+                    style={[
+                      styles.goalNameRow,
+                      { backgroundColor: "transparent" },
+                    ]}
+                  >
+                    <Text style={[styles.goalName, { color: c.text }]}>
+                      {item.name}
+                    </Text>
+                    {item.timeframe === "monthly" ? (
+                      <View
+                        style={[
+                          styles.tag,
+                          { backgroundColor: Colors.accentLight },
+                        ]}
+                      >
+                        <Text
+                          style={[styles.tagText, { color: Colors.accent }]}
+                        >
+                          Monthly
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
                   <Text style={[styles.goalHours, { color: c.textSecondary }]}>
-                    {item.totalHours.toFixed(1)}h of {item.goalHours ?? 100}h
+                    {item.timeframe === "monthly" && item.monthKey
+                      ? `${monthKeyToDate(item.monthKey as MonthKey).toLocaleString("en-US", { month: "short", year: "numeric" })}: ${item.totalHours.toFixed(1)}h of ${item.goalHours ?? 100}h`
+                      : `${item.totalHours.toFixed(1)}h of ${item.goalHours ?? 100}h`}
                   </Text>
                 </View>
                 <View
@@ -532,7 +577,19 @@ const styles = StyleSheet.create({
   },
   goalIcon: { fontSize: 24 },
   goalInfo: { flex: 1 },
+  goalNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   goalName: { fontSize: 17, fontWeight: "700" },
+  tag: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    marginLeft: 10,
+  },
+  tagText: { fontSize: 11, fontWeight: "800", letterSpacing: 0.3 },
   goalHours: { fontSize: 13, marginTop: 2 },
   percentBadge: {
     paddingHorizontal: 10,

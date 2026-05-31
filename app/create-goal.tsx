@@ -9,7 +9,7 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { createGoal } from "@/db";
 import { View, Text, useColors } from "@/components/Themed";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -17,6 +17,8 @@ import { scheduleGoalReminder } from "@/utils/notifications";
 import * as Haptics from "expo-haptics";
 import Colors from "@/constants/Colors";
 import ScreenLayout from "@/components/ScreenLayout";
+import { MonthSelector } from "@/components/MonthSelector";
+import { getMonthKey, monthKeyToDate, type MonthKey } from "@/utils/month";
 
 const ICON_OPTIONS = [
   "🎯",
@@ -52,15 +54,42 @@ const ICON_OPTIONS = [
 ];
 
 export default function CreateGoalScreen() {
+  const params = useLocalSearchParams<{
+    timeframe?: string;
+    monthKey?: string;
+  }>();
   const router = useRouter();
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("🎯");
   const [goalHours, setGoalHours] = useState("100");
+  const [monthlyEnabled, setMonthlyEnabled] = useState(
+    params.timeframe === "monthly",
+  );
+  const [month, setMonth] = useState<Date>(() => {
+    const initial =
+      params.monthKey && typeof params.monthKey === "string"
+        ? monthKeyToDate(params.monthKey as MonthKey)
+        : new Date();
+    initial.setDate(1);
+    initial.setHours(0, 0, 0, 0);
+    return initial;
+  });
   const [reminderEnabled, setReminderEnabled] = useState(false);
   const [reminderHour, setReminderHour] = useState(18);
   const [reminderMinute, setReminderMinute] = useState(0);
+  const monthlyAnim = useRef(new Animated.Value(monthlyEnabled ? 1 : 0))
+    .current;
   const reminderAnim = useRef(new Animated.Value(0)).current;
   const c = useColors();
+
+  const toggleMonthly = (value: boolean) => {
+    setMonthlyEnabled(value);
+    Animated.timing(monthlyAnim, {
+      toValue: value ? 1 : 0,
+      duration: 250,
+      useNativeDriver: false,
+    }).start();
+  };
 
   const toggleReminder = (value: boolean) => {
     setReminderEnabled(value);
@@ -80,6 +109,8 @@ export default function CreateGoalScreen() {
       name: trimmed,
       icon,
       goalHours: Number(goalHours) || 100,
+      timeframe: monthlyEnabled ? "monthly" : "all_time",
+      monthKey: monthlyEnabled ? (getMonthKey(month) as MonthKey) : null,
       reminderHour: reminderEnabled ? reminderHour : null,
       reminderMinute: reminderEnabled ? reminderMinute : null,
     };
@@ -154,6 +185,64 @@ export default function CreateGoalScreen() {
           placeholder="100"
           placeholderTextColor={c.textMuted}
         />
+
+        {/* Calendar Month */}
+        <Text style={[styles.label, { color: c.textSecondary }]}>
+          Calendar Month
+        </Text>
+        <View
+          style={[
+            styles.reminderCard,
+            { backgroundColor: c.card, borderColor: c.border },
+          ]}
+        >
+          <View
+            style={[
+              styles.reminderToggleRow,
+              { backgroundColor: "transparent" },
+            ]}
+          >
+            <MaterialIcons
+              name="date-range"
+              size={20}
+              color={monthlyEnabled ? Colors.accent : c.textMuted}
+            />
+            <View
+              style={[styles.reminderInfo, { backgroundColor: "transparent" }]}
+            >
+              <Text style={[styles.reminderLabel, { color: c.text }]}>
+                Tie to a calendar month
+              </Text>
+              <Text style={[styles.reminderSub, { color: c.textMuted }]}>
+                Perfect for “June: 10 hours of guitar”
+              </Text>
+            </View>
+            <Switch
+              value={monthlyEnabled}
+              onValueChange={toggleMonthly}
+              trackColor={{ false: c.border, true: Colors.accentLight }}
+              thumbColor={monthlyEnabled ? Colors.accent : c.textMuted}
+            />
+          </View>
+          <Animated.View
+            style={{
+              maxHeight: monthlyAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 120],
+              }),
+              opacity: monthlyAnim,
+              overflow: "hidden",
+            }}
+          >
+            <View
+              style={[styles.timePickerDivider, { backgroundColor: c.border }]}
+            />
+            <View style={{ paddingTop: 14, backgroundColor: "transparent" }}>
+              <MonthSelector month={month} onMonthChange={setMonth} />
+            </View>
+          </Animated.View>
+        </View>
+
         <Text style={[styles.label, { color: c.textSecondary }]}>Icon</Text>
         <View style={[styles.iconRow, { backgroundColor: "transparent" }]}>
           {ICON_OPTIONS.map((ic) => (

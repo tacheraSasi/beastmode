@@ -21,6 +21,16 @@ export const goals = sqliteTable("goals", {
 
   goalHours: integer("goal_hours").default(100),
 
+  /**
+   * Goal tracking timeframe.
+   * - all_time: progress across all sessions
+   * - monthly: progress limited to the goal's calendar `monthKey`
+   */
+  timeframe: text("timeframe").notNull().default("all_time"),
+
+  /** Calendar month key (YYYY-MM) when timeframe is `monthly` */
+  monthKey: text("month_key"),
+
   /** Hour (0-23) for daily reminder, null means no reminder */
   reminderHour: integer("reminder_hour"),
 
